@@ -6,7 +6,12 @@ public class TorrentInfo
     String path_;
     int fileLength;
     int pieceLength;
-    Byte[] sha1;
+    byte[] infoHash;
+
+    public byte[] getInfoHash()
+    {
+        return infoHash;
+    }
 
     public String getFilename(){return filename;}
     public String getPath(){return path_;}
@@ -25,7 +30,11 @@ public class TorrentInfo
         }
         return  piecesCount;
     }
-    public Byte[] getSha1(){return sha1;}
+
+    public void setInfoHash(byte[] infoHash)
+    {
+        this.infoHash = infoHash;
+    }
 
     public void setPath(String path){path_ = path;}
 
@@ -42,10 +51,5 @@ public class TorrentInfo
     public void setPieceLength(int pieceLength)
     {
         this.pieceLength = pieceLength;
-    }
-
-    public void setSha1(Byte[] sha1)
-    {
-        this.sha1 = sha1;
     }
 }

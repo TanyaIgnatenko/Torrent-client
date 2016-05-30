@@ -1,7 +1,7 @@
 package ru.nsu.ignatenko.torrent.message;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import ru.nsu.ignatenko.torrent.Peer;
+
 import java.nio.channels.SocketChannel;
 
 public abstract class Message
@@ -9,11 +9,11 @@ public abstract class Message
     protected byte[] payload;
     protected int id;
     protected int length;
-    protected byte[] peerID;
+    protected Peer peer;
 
-    public byte[] getPeerID()
+    public Peer getPeer()
     {
-        return peerID;
+        return peer;
     }
     public byte[] getPayload(){return payload;}
     public void parse(SocketChannel socket){}

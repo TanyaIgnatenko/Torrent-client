@@ -1,5 +1,8 @@
 package ru.nsu.ignatenko.torrent.message;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import ru.nsu.ignatenko.torrent.Peer;
 import ru.nsu.ignatenko.torrent.message.Message;
 
 import java.io.IOException;
@@ -8,17 +11,19 @@ import java.nio.channels.SocketChannel;
 
 public class Bitfield  extends Message
 {
+    private static Logger logger = LogManager.getLogger("default_logger");
     byte[] bitfield;
 
-    public Bitfield(int length, byte[] peerID)
+    public Bitfield(int length, Peer peer)
     {
         this.length = length;
         bitfield = new byte[this.length];
-        this.peerID = peerID;
+        this.peer = peer;
     }
 
     public void parse(SocketChannel socket)
     {
+        logger.info("In bitfield parse ");
        ByteBuffer data = ByteBuffer.allocate(length);
        try
        {
@@ -30,6 +35,7 @@ public class Bitfield  extends Message
        }
        data.rewind();
        data.get(bitfield);
+        logger.info("In the end of bitfield react");
     }
 
     @Override

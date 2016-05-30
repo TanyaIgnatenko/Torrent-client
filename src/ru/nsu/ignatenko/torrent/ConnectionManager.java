@@ -3,6 +3,7 @@ package ru.nsu.ignatenko.torrent;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.nsu.ignatenko.torrent.message.Message;
 
 import java.io.EOFException;
 import java.net.InetAddress;
@@ -13,13 +14,10 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 import java.io.IOException;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class ConnectionManager implements Runnable
 {
@@ -30,17 +28,18 @@ public class ConnectionManager implements Runnable
 
 
 	private ServerSocketChannel serverSocket;
-	private ConcurrentMap<byte[], Peer> connectedPeers;
+	private BlockingQueue<Peer> connectedPeers;
 	private TorrentInfo torrentInfo;
+	Peer ourPeer;
 
 	private Selector selector;
-	private Map<byte[], SocketChannel> clients;
+	private MessageManager messageManager;
 	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(4, 4, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(30));
 	private boolean stop = false;
-	private MessageManager messageManager;
 
 
-	public ConnectionManager(MessageManager messageManager, ConcurrentMap<byte[], Peer> connectedPeers)
+	public ConnectionManager(MessageManager messageManager, BlockingQueue<Peer> connectedPeers,
+							 Peer ourPeer, TorrentInfo torrentInfo)
 	{
 		for(int port = MIN_PORT; port <= MAX_PORT; ++port)
 		{
@@ -63,6 +62,8 @@ public class ConnectionManager implements Runnable
 
 		this.messageManager = messageManager;
 		this.connectedPeers = connectedPeers;
+		this.torrentInfo = torrentInfo;
+		this.ourPeer = ourPeer;
 		try
 		{
 			selector = Selector.open();
@@ -79,22 +80,21 @@ public class ConnectionManager implements Runnable
 		thread.start();
 	}
 
-	public void connectTo(Peer peer, TorrentInfo torrentInfo)
+	public void connectTo(Peer peer)
 	{
 		try
 		{
 			logger.info("Try connect to some peer");
-			byte[] ip = {127, 0, 0, 1};
-			SocketChannel client = SocketChannel.open(new InetSocketAddress(InetAddress.getByAddress(ip), peer.getPort()));
-
+			SocketChannel client = SocketChannel.open(new InetSocketAddress(peer.getIp(), peer.getPort()));
+			messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getInfoHash());
 				logger.info("Sending handshake...");
 				int bytesWrote = messageManager.sendHandshake(client);
 				logger.info("Handshake sent " + bytesWrote + " bytes.");
 				logger.info("Receiving handshake...");
 				Handshake clientHandshake = messageManager.receiveHandshake(client);
 //			if(!messageManager.isValidHandshake(clientHandshake, peer.getPeerID()))
-				if(!messageManager.isValidHandshake(clientHandshake))
-				{
+			if(!messageManager.isValidHandshake(clientHandshake))
+			{
 				logger.info("Invalid handshake. Dropping connection...");
 				client.close();
 			}
@@ -103,7 +103,14 @@ public class ConnectionManager implements Runnable
 				logger.info("Got valid handshake");
 				peer.setSocket(client);
 				client.configureBlocking(false);
-				connectedPeers.put(peer.getPeerID(), peer);
+				try
+				{
+					connectedPeers.put(peer);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
 				client.register(selector, SelectionKey.OP_READ, peer);
 			}
 		}
@@ -123,6 +130,7 @@ public class ConnectionManager implements Runnable
 				SocketChannel client = serverSocket.accept();
 				logger.info("Some peer want to connect to me");
 				logger.info("Receiving handshake...");
+				messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getInfoHash());
 				Handshake clientHandshake = messageManager.receiveHandshake(client);
 				if(!messageManager.isValidHandshake(clientHandshake))
 				{
@@ -139,7 +147,14 @@ public class ConnectionManager implements Runnable
 				peer.setSocket(client);
 				peer.setPeerID(clientHandshake.getPeerID());
 				client.configureBlocking(false);
-				connectedPeers.put(peer.getPeerID(), peer);
+				try
+				{
+					connectedPeers.put(peer);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
 				client.register(selector, SelectionKey.OP_READ, peer);
 			}
 			catch(IOException e)
