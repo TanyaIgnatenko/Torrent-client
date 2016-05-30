@@ -38,6 +38,7 @@ public class TorrentClient
 
         Peer ourPeer = new Peer();
         ourPeer.setPeerID("12345678901234567891".getBytes(Charset.forName("ASCII")));
+
         BitSet bitfield = new BitSet(torrentInfo.getPiecesCount());
         ourPeer.setBitfield(bitfield);
         Peer[] peers = getPeersInfo();
@@ -163,7 +164,7 @@ public class TorrentClient
 //        }
         Peer[] peers = new Peer[1];
         peers[0] = new Peer();
-        peers[0].setPeerID(new byte[]{1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0});
+        peers[0].setPeerID("12345678901234567890".getBytes(Charset.forName("ASCII")));
         try
         {
             peers[0].setIp(InetAddress.getByName("127.0.0.1"));
