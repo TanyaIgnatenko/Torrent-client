@@ -1,6 +1,6 @@
 package ru.nsu.ignatenko.torrent.message;
 
-import ru.nsu.ignatenko.torrent.message.Message;
+import ru.nsu.ignatenko.torrent.Peer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -8,15 +8,13 @@ import java.nio.channels.SocketChannel;
 
 public class Request  extends Message
 {
-    int length;
-    int pieceIdx;
-    byte[] peerID;
-    private SocketChannel socket;
+    private int length;
+    private int pieceIdx;
 
-    public Request(int length, byte[] peerID)
+    public Request(int length, Peer peer)
     {
         this.length = length;
-        this.peerID = peerID;
+        this.peer = peer;
     }
 
     public void parse(SocketChannel socket)
@@ -27,7 +25,6 @@ public class Request  extends Message
             socket.read(idx);
             idx.rewind();
             pieceIdx = idx.getInt();
-            this.socket = socket;
         }
         catch(IOException e)
         {
@@ -39,6 +36,4 @@ public class Request  extends Message
     {
         return pieceIdx;
     }
-
-    public SocketChannel getSocket(){return socket;}
 }

@@ -1,9 +1,8 @@
 package ru.nsu.ignatenko.torrent.message;
 
-import com.sun.media.sound.InvalidFormatException;
+import ru.nsu.ignatenko.torrent.Peer;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -11,9 +10,10 @@ public class Have  extends Message
 {
     private int idx;
 
-    public Have(int length, byte[] peerID)
+    public Have(int length, Peer peer)
     {
         this.length = length;
+        this.peer = peer;
     }
 
     public void parse(SocketChannel socket)

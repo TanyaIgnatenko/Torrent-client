@@ -1,31 +1,33 @@
 package ru.nsu.ignatenko.torrent.message;
 
+import ru.nsu.ignatenko.torrent.Peer;
+
 public class MessageFactory
 {
-    public Message create(int id, int length, byte[] peerID)
+    public Message create(int id, int length, Peer peer)
     {
         switch (id)
         {
             case -1:
-                return new KeepAlive(length, peerID);
+                return new KeepAlive(length, peer);
             case 0:
-                return new Choke(length, peerID);
+                return new Choke(length, peer);
             case 1:
-                return new Unchoke(length, peerID);
+                return new Unchoke(length, peer);
             case 2:
-                return new Interested(length, peerID);
+                return new Interested(length, peer);
             case 3:
-                return new Uninterested(length, peerID);
+                return new Uninterested(length, peer);
             case 4:
-                return new Have(length, peerID);
+                return new Have(length, peer);
             case 5:
-                return new Bitfield(length, peerID);
+                return new Bitfield(length, peer);
             case 6:
-                return new Request(length, peerID);
+                return new Request(length, peer);
             case 7:
-                return new Piece(length, peerID);
+                return new Piece(length, peer);
             case 8:
-                return new Cancel(length, peerID);
+                return new Cancel(length, peer);
         }
         return null;
     }

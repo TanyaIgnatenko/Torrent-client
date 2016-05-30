@@ -1,5 +1,6 @@
 package ru.nsu.ignatenko.torrent;
 
+import java.net.InetAddress;
 import java.nio.channels.SocketChannel;
 import java.util.BitSet;
 
@@ -8,76 +9,76 @@ public class Peer
     private BitSet bitfield;
     private SocketChannel socket;
     private byte[] peerID;
-    private String ip;
+    private InetAddress ip;
     private int port;
     private boolean hasOurBitfield;
 
-    public void setBitfield(BitSet bitfield)
+    public synchronized void setBitfield(BitSet bitfield)
     {
         this.bitfield = bitfield;
     }
 
-    public void setBit(int pieceIdx)
+    public synchronized void setBit(int pieceIdx)
     {
        bitfield.set(pieceIdx);
     }
 
-    public void setHasOurBitfield()
+    public synchronized void setHasOurBitfield()
     {
         hasOurBitfield = true;
     }
 
-    public void setSocket(SocketChannel socket)
+    public synchronized void setSocket(SocketChannel socket)
     {
         this.socket = socket;
     }
 
-    public void setIp(String ip)
+    public synchronized void setIp(InetAddress ip)
     {
         this.ip = ip;
     }
 
-    public void setPort(int port)
+    public synchronized void setPort(int port)
     {
         this.port = port;
     }
 
-    public void setPeerID(byte[] peerID)
+    public synchronized void setPeerID(byte[] peerID)
     {
         this.peerID = peerID;
     }
 
-    public boolean getHasOurBitfield()
+    public synchronized boolean getHasOurBitfield()
     {
         return hasOurBitfield;
     }
 
-    public boolean getBit(int pieceIdx)
+    public synchronized boolean getBit(int pieceIdx)
     {
         return bitfield.get(pieceIdx);
     }
 
-    public BitSet getBitfield()
+    public synchronized BitSet getBitfield()
     {
         return bitfield;
     }
 
-    public byte[] getPeerID()
+    public synchronized byte[] getPeerID()
     {
         return peerID;
     }
 
-    public int getPort()
+    public synchronized int getPort()
     {
         return port;
     }
 
-    public String getIp()
+    public synchronized InetAddress getIp()
     {
         return ip;
     }
 
-    public SocketChannel getSocket()
+    public synchronized SocketChannel getSocket()
     {
         return socket;
     }

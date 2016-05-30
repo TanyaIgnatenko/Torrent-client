@@ -34,13 +34,13 @@ public class MessageManager
     public MessageManager(HashMap<Byte, Reaction> messageReactions)
     {
         this.messageReactions = messageReactions;
-        handshake.setInfoHash("infohashinfohashinfohash1234".getBytes(Charset.forName("ASCII")));
         handshake.setProtocolName("Bittorrent Protocol".getBytes(Charset.forName("ASCII")));
     }
 
-    public void setHandshake(Handshake handshake)
+    public void createHandshake(byte[] peerID, byte[] infoHash)
     {
-        this.handshake = handshake;
+        handshake.setPeerID(peerID);
+        handshake.setInfoHash(infoHash);
     }
 
     public int sendHandshake(SocketChannel socket) throws IOException
@@ -143,7 +143,13 @@ public class MessageManager
     {
         try
         {
-            int bytesWrote = socket.write(message);
+//            logger.info("In sendMessage size of message : "+message.remaining());
+//            int bytesWrote = socket.write(message);
+//            byte id = message.get(4);
+//            logger.info("Sended message {} into socket in size {} bytes.", id, bytesWrote);
+            int bytesWrote;
+            logger.info("In sendMessage size of message : " + message.remaining());
+            while ((bytesWrote = socket.write(message)) == 0);
             byte id = message.get(4);
             logger.info("Sended message {} into socket in size {} bytes.", id, bytesWrote);
         }
@@ -195,6 +201,7 @@ public class MessageManager
 
     public ByteBuffer generatePiece(byte[] piece, int pieceIdx)
     {
+//        logger.info("In generatePiece length of piece: " + piece.length+ "\n piece: "+new String(piece));
         int length = piece.length + 4 +  1;
         ByteBuffer message = ByteBuffer.allocate(length + 4);
         byte id = 7;
@@ -251,12 +258,12 @@ public class MessageManager
         data2.rewind();
         byte id = data2.get();
         logger.info("With id " + id);
-        Message message = messageFactory.create(id, length-1, peer.getPeerID());
+        Message message = messageFactory.create(id, length-1, peer);
         message.parse(socket);
         if (messageReactions == null)
         {
             System.out.println("mesReact == null");
         }
-        messageReactions.get(id).react(message, socket);
+        messageReactions.get(id).react(message);
     }
 }

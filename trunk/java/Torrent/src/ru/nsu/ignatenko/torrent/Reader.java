@@ -21,7 +21,7 @@ public class Reader implements Runnable
     byte lastPiece[];
 
     BlockingQueue<Trio> readyQueue = new LinkedBlockingQueue<>();
-    BlockingQueue<Pair> mustReadQueue = new LinkedBlockingQueue<>();
+    BlockingQueue<Pair<Integer, SocketChannel>> mustReadQueue = new LinkedBlockingQueue<>();
 
     public Reader()
     {
@@ -63,34 +63,20 @@ public class Reader implements Runnable
     {
         while (true)
         {
-            Pair data = null;
-            synchronized (mustReadQueue)
+            Pair<Integer, SocketChannel> data = null;
+            try
             {
-                while (mustReadQueue.isEmpty())
-                {
-                    try
-                    {
-                        mustReadQueue.wait();
-                    }
-                    catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                try
-                {
-                    data = mustReadQueue.take();
-                }
-                catch(Exception e)
-                {
-                    e.printStackTrace();
-                }
+                data = mustReadQueue.take();
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
             }
             read(data);
         }
     }
 
-    public void read(Pair data)
+    public void read(Pair<Integer, SocketChannel> data)
     {
         Integer idx = data.first;
         SocketChannel socket = data.second;
@@ -132,7 +118,7 @@ public class Reader implements Runnable
         }
     }
 
-    public BlockingQueue<Pair> getMustReadQueue()
+    public BlockingQueue<Pair<Integer, SocketChannel>> getMustReadQueue()
     {
         return mustReadQueue;
     }

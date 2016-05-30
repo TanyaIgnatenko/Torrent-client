@@ -9,24 +9,27 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class Coordinator implements Runnable
 {
     private static Logger logger = LogManager.getLogger("default_logger");
-    Writer writer;
+    private Writer writer;
+    private Reader reader;
+    private ConnectionManager connectionManager;
     private BlockingQueue<Trio> readyReadQueue;
 
     private BlockingQueue<Integer> readyWriteQueue;
 
     private MessageManager messageManager;
-    ConcurrentMap<byte[], Peer> connectedPeers;
-    TorrentInfo torrentInfo;
-    Peer ourPeer;
+    private BlockingQueue<Peer> connectedPeers;
+    private TorrentInfo torrentInfo;
+    private Peer ourPeer;
     boolean cancel = false;
     boolean has_all = false;
     boolean stop = false;
 
-    public Coordinator(ConcurrentMap<byte[], Peer> connectedPeers, MessageManager messageManager,
+    public Coordinator(BlockingQueue<Peer> connectedPeers, MessageManager messageManager,
                        BlockingQueue<Integer>readyWriteQueue, BlockingQueue<Trio> readyReadQueue,
                        Peer ourPeer, Writer writer, TorrentInfo torrentInfo)
     {
@@ -51,7 +54,7 @@ public class Coordinator implements Runnable
         boolean asked[] = new boolean[torrentInfo.getPiecesCount()];
         while (true)
         {
-            for (Peer peer : connectedPeers.values())
+            for (Peer peer : connectedPeers)
             {
                 if (!peer.getHasOurBitfield())
                 {
@@ -64,40 +67,29 @@ public class Coordinator implements Runnable
             if (cancel)
             {
                 ByteBuffer message = messageManager.generateCancel();
-                for (Peer peer : connectedPeers.values())
+                for (Peer peer : connectedPeers)
                 {
                     messageManager.sendMessage(peer.getSocket(), message);
                 }
             }
-            if (!readyWriteQueue.isEmpty())
+
+            Integer pieceIdx = readyWriteQueue.poll();
+            if(pieceIdx != null)
             {
-                try
-                {
-                    int pieceIdx = readyWriteQueue.take();
-                    ourPeer.setBit(pieceIdx);
-//                    ByteBuffer message = messageManager.generateHave(pieceIdx);
-//                    for (Peer peer : connectedPeers.values())
-//                    {
-//                        messageManager.sendMessage(peer.getSocket(), message);
-//                    }
-                }
-                catch(Exception e)
-                {
-                    e.printStackTrace();
-                }
+                ourPeer.setBit(pieceIdx);
+//                ByteBuffer message = messageManager.generateHave(pieceIdx);
+//                for (Peer peer : connectedPeers.values())
+//                {
+//                    messageManager.sendMessage(peer.getSocket(), message);
+//                }
             }
-            if (!readyReadQueue.isEmpty())
-            {   try
-                {
-                    Trio data = readyReadQueue.take();
-//                    logger.info("Coordinator read from readyReadQueue: " + new String(data.second));
-                    ByteBuffer message = messageManager.generatePiece(data.second, data.first);
-                    messageManager.sendMessage(data.third, message);
-                }
-                catch(Exception e)
-                {
-                    e.printStackTrace();
-                }
+
+            Trio data = readyReadQueue.poll();
+            if(data != null)
+            {
+//                logger.info("Coordinator read from readyReadQueue: " + new String(data.second));
+                ByteBuffer message = messageManager.generatePiece(data.second, data.first);
+                messageManager.sendMessage(data.third, message);
             }
 
             if (!stop)
@@ -113,7 +105,7 @@ public class Coordinator implements Runnable
                         has_all = false;
                         if(!asked[i])
                         {
-                            for (Peer peer : connectedPeers.values())
+                            for (Peer peer : connectedPeers)
                             {
                                 bitfieldOfPeer = peer.getBitfield();
                                 if (bitfieldOfPeer != null && bitfieldOfPeer.get(i))

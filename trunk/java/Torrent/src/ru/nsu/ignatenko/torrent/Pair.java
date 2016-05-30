@@ -1,14 +1,11 @@
 package ru.nsu.ignatenko.torrent;
 
-import java.nio.channels.SocketChannel;
-
-public class Pair
+public class Pair<F, S>
 {
-    public int first;
-    public SocketChannel second;
+    public F first;
+    public S second;
 
-    public Pair(){}
-    public Pair(int first, SocketChannel second)
+    public Pair(F first, S second)
     {
         this.first = first;
         this.second = second;

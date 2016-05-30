@@ -3,11 +3,12 @@ package ru.nsu.ignatenko.torrent;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 public class Bencoder
 {
 
-    public static TorrentInfo parser()
+    public static TorrentInfo parser(DataInputStream torrentFile)
     {
         TorrentInfo torrentInfo = new TorrentInfo();
 //        try
@@ -27,7 +28,7 @@ public class Bencoder
 
         torrentInfo.setFilename("image2.jpg");
         torrentInfo.setPieceLength(20000);
-        torrentInfo.setSha1(new Byte[5]);
+        torrentInfo.setInfoHash("infohashinfohashinfohash1234".getBytes((Charset.forName("ASCII"))));
         torrentInfo.setFileLength(155269);
         return torrentInfo;
     }

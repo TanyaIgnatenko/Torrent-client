@@ -1,27 +1,21 @@
 package ru.nsu.ignatenko.torrent.message.reaction;
 
-import ru.nsu.ignatenko.torrent.Peer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.nsu.ignatenko.torrent.message.Message;
 
-import java.io.OutputStream;
-import java.nio.channels.SocketChannel;
 import java.util.BitSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 public class BitfieldReaction extends Reaction
 {
-    ConcurrentMap<byte[],Peer> connectedPeers;
+    private static Logger logger = LogManager.getLogger("default_logger");
 
-    public BitfieldReaction(ConcurrentMap<byte[],Peer> connectedPeers)
+    public void react(Message message)
     {
-        this.connectedPeers = connectedPeers;
-    }
-
-    public void react(Message message, SocketChannel socket)
-    {
+        logger.info("In bitfield react");
         BitSet bitfield = BitSet.valueOf(message.getPayload());
-        connectedPeers.get(message.getPeerID()).setBitfield(bitfield);
+        message.getPeer().setBitfield(bitfield);
+        logger.info("We reacted on bitfield");
+
     }
 }

@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.ArrayDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -19,7 +18,7 @@ public class Writer implements Runnable
     byte piece[][];
     private boolean stop;
 
-    BlockingQueue<Pair2> piecesQueue = new LinkedBlockingQueue<>();
+    BlockingQueue<Pair<Integer, byte[]>> piecesQueue = new LinkedBlockingQueue<>();
     BlockingQueue<Integer> changesQueue = new LinkedBlockingQueue<>();
 
     public Writer()
@@ -53,28 +52,14 @@ public class Writer implements Runnable
     {
         while (!stop)
         {
-            Pair2 pieceInfo = null;
-            synchronized (piecesQueue)
+            Pair<Integer, byte[]> pieceInfo = null;
+            try
             {
-                while (piecesQueue.isEmpty())
-                {
-                    try
-                    {
-                        piecesQueue.wait();
-                    }
-                    catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                try
-                {
-                    pieceInfo = piecesQueue.take();
-                }
-                catch(Exception e)
-                {
-                    e.printStackTrace();
-                }
+                pieceInfo = piecesQueue.take();
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
             }
             write(pieceInfo.first, pieceInfo.second);
         }
@@ -118,7 +103,7 @@ public class Writer implements Runnable
         }
     }
 
-    public BlockingQueue<Pair2> getMustWriteQueue()
+    public BlockingQueue<Pair<Integer, byte[]>> getMustWriteQueue()
     {
         return piecesQueue;
     }
