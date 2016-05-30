@@ -136,6 +136,7 @@ public class MessageManager
         {
             return isValidHandshake(clientHandshake);
         }
+        logger.info("Expected peerID: {} actual clien't peerID: {}", expectedPeerID, clientHandshake.getPeerID());
         return false;
     }
 

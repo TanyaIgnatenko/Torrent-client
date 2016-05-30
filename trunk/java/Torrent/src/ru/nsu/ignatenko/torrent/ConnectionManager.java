@@ -92,8 +92,8 @@ public class ConnectionManager implements Runnable
 				logger.info("Handshake sent " + bytesWrote + " bytes.");
 				logger.info("Receiving handshake...");
 				Handshake clientHandshake = messageManager.receiveHandshake(client);
-//			if(!messageManager.isValidHandshake(clientHandshake, peer.getPeerID()))
-			if(!messageManager.isValidHandshake(clientHandshake))
+			if(!messageManager.isValidHandshake(clientHandshake, peer.getPeerID()))
+//			if(!messageManager.isValidHandshake(clientHandshake))
 			{
 				logger.info("Invalid handshake. Dropping connection...");
 				client.close();
