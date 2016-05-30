@@ -33,9 +33,11 @@ public class Writer implements Runnable
         piece = new byte[piecesCount][pieceLength];
         try
         {
-            file = new RandomAccessFile(new File(path), "rw");
+            File tmp = new File(path);
+            tmp.createNewFile();
+            file = new RandomAccessFile(tmp, "rw");
         }
-        catch (FileNotFoundException e)
+        catch (IOException e)
         {
             e.printStackTrace();
         }

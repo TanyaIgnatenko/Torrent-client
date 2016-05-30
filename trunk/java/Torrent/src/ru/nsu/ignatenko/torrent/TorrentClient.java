@@ -25,16 +25,13 @@ public class TorrentClient
 
     public void download(String[] args)
     {
+        String pathToTorrent = args[0];
         DataInputStream torrentFile = new DataInputStream(
-                ClassLoader.getSystemClassLoader().getResourceAsStream(args[0]));
+                ClassLoader.getSystemClassLoader().getResourceAsStream(pathToTorrent));
 
         TorrentInfo torrentInfo = Bencoder.parser(torrentFile);
-        String pathTorrentFile = ClassLoader.getSystemClassLoader().getResource(args[0]).getPath();
-        String pathToDir = pathTorrentFile.substring(0, pathTorrentFile.length() - args[0].length());
-        String pathToWrite = pathToDir + "download/" + torrentInfo.getFilename();
-        String pathToRead = pathToDir + torrentInfo.getFilename();
-        System.out.println(pathToRead);
-        torrentInfo.setPath(pathToDir);
+        String pathToFile = args[1] + torrentInfo.getFilename();
+        torrentInfo.setPath(pathToFile);
 
         Peer ourPeer = new Peer();
         ourPeer.setPeerID("12345678901234567891".getBytes(Charset.forName("ASCII")));
@@ -44,16 +41,16 @@ public class TorrentClient
         Peer[] peers = getPeersInfo();
 
         writer.initiate(torrentInfo.getFilename(),
-                        pathToWrite,
+                        torrentInfo.getPath(),
                         torrentInfo.getFileLength(),
                         torrentInfo.getPieceLength(),
                         torrentInfo.getPiecesCount());
 
-//        reader.initiate(torrentInfo.getFilename(),
-//                        pathToRead,
-//                        torrentInfo.getFileLength(),
-//                        torrentInfo.getPieceLength(),
-//                        torrentInfo.getPiecesCount());
+        reader.initiate(torrentInfo.getFilename(),
+                        torrentInfo.getPath(),
+                        torrentInfo.getFileLength(),
+                        torrentInfo.getPieceLength(),
+                        torrentInfo.getPiecesCount());
 
         coordinator = new Coordinator(connectedPeers,
                                       messageManager,
@@ -83,14 +80,13 @@ public class TorrentClient
 
     public void load(String[] args)
     {
+        String pathToTorrent = args[2];
         DataInputStream torrentFile = new DataInputStream(
-                ClassLoader.getSystemClassLoader().getResourceAsStream(args[0]));
+                ClassLoader.getSystemClassLoader().getResourceAsStream(pathToTorrent));
         TorrentInfo torrentInfo = Bencoder.parser(torrentFile);
 
-        String pathTorrentFile = ClassLoader.getSystemClassLoader().getResource(args[0]).getPath();
-        String pathToDir = pathTorrentFile.substring(0, pathTorrentFile.length() - args[0].length());
-        String pathToWrite = pathToDir + "download/" + torrentInfo.getFilename();
-        String pathToRead = pathToDir + torrentInfo.getFilename();
+        String pathToFile = args[3] + torrentInfo.getFilename();
+        torrentInfo.setPath(pathToFile);
 
         Peer ourPeer = new Peer();
         ourPeer.setPeerID("12345678901234567890".getBytes(Charset.forName("ASCII")));
@@ -102,23 +98,23 @@ public class TorrentClient
         ourPeer.setBitfield(bitfield);
 
 
-//        writer.initiate(torrentInfo.getFilename(),
-//                torrentInfo.getPath(),
-//                torrentInfo.getFileLength(),
-//                torrentInfo.getPieceLength(),
-//                torrentInfo.getPiecesCount());
-
-        reader.initiate(torrentInfo.getFilename(),
-                pathToRead,
+        writer.initiate(torrentInfo.getFilename(),
+                torrentInfo.getPath(),
                 torrentInfo.getFileLength(),
                 torrentInfo.getPieceLength(),
                 torrentInfo.getPiecesCount());
 
+        reader.initiate(torrentInfo.getFilename(),
+                        torrentInfo.getPath(),
+                        torrentInfo.getFileLength(),
+                        torrentInfo.getPieceLength(),
+                        torrentInfo.getPiecesCount());
+
         coordinator = new Coordinator(connectedPeers,
-                messageManager,
-                writer.getReadyWriteQueue(),
-                reader.getReadyReadQueue(),
-                ourPeer, writer, torrentInfo);
+                                      messageManager,
+                                      writer.getReadyWriteQueue(),
+                                      reader.getReadyReadQueue(),
+                                      ourPeer, writer, torrentInfo);
 
         connectionManager = new ConnectionManager(messageManager, connectedPeers, ourPeer, torrentInfo);
         connectionManager.workSelector();
