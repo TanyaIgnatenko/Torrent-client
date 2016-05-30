@@ -224,7 +224,6 @@ public class MessageManager
         {
             payload[i] = (byte)0;
         }
-        System.out.println("payload length: "+payload.length);
         int length = payload.length+1;
         ByteBuffer message = ByteBuffer.allocate(length + 4);
         byte id = 5;
@@ -233,7 +232,6 @@ public class MessageManager
         message.put(payload);
         logger.info("Generated bitfield message");
         message.flip();
-        System.out.println("Buffer limit: "+message.limit());
         return message;
     }
 
@@ -250,7 +248,6 @@ public class MessageManager
         data1.rewind();
         if (count != 4)
         {
-            System.out.println(count);
             throw new InvalidFormatException();
         }
         int length = data1.getInt();

@@ -44,9 +44,11 @@ public class Reader implements Runnable
         lastPiece = new byte[lastPieceLength];
         try
         {
-            file = new RandomAccessFile(new File(path), "r");
+            File tmp = new File(path);
+            tmp.createNewFile();
+            file = new RandomAccessFile(tmp, "r");
         }
-        catch (FileNotFoundException e)
+        catch (IOException e)
         {
             e.printStackTrace();
         }
