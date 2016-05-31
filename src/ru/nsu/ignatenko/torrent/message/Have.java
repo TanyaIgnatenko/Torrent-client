@@ -30,4 +30,6 @@ public class Have  extends Message
         data.rewind();
         idx = data.getInt();
     }
+
+    public int getPieceIdx(){return idx;}
 }
