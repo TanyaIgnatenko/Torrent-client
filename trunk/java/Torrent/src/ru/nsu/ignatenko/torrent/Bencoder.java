@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 public class Bencoder
 {
 
-    public static TorrentInfo parser(DataInputStream torrentFile)
+    public static TorrentInfo parse(DataInputStream torrentFile)
     {
         TorrentInfo torrentInfo = new TorrentInfo();
 //        try

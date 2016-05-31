@@ -4,7 +4,6 @@ import ru.nsu.ignatenko.torrent.Peer;
 
 public class Unchoke  extends Message
 {
-
     public Unchoke(int length, Peer peer)
     {
         this.length = length;
