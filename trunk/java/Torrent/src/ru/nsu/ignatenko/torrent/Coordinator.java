@@ -58,7 +58,7 @@ public class Coordinator implements Runnable
         {
             for (Peer peer : connectedPeers)
             {
-                if (!peer.getHasOurBitfield())
+                if (!peer.hasOurBitfield())
                 {
                     logger.info("Coordinator found some peer without our bitfield");
                     ByteBuffer message = messageManager.generateBitfield(ourPeer.getBitfield(), torrentInfo.getPiecesCount());
@@ -78,12 +78,13 @@ public class Coordinator implements Runnable
             Integer pieceIdx = readyWriteQueue.poll();
             if(pieceIdx != null)
             {
-                ourPeer.setBit(pieceIdx);
-//                ByteBuffer message = messageManager.generateHave(pieceIdx);
-//                for (Peer peer : connectedPeers.values())
-//                {
-//                    messageManager.sendMessage(peer.getSocket(), message);
-//                }
+                BitSet bitfield = ourPeer.getBitfield();
+                bitfield.set(pieceIdx);
+                ByteBuffer message = messageManager.generateHave(pieceIdx);
+                for (Peer peer : connectedPeers)
+                {
+                    messageManager.sendMessage(peer.getSocket(), message);
+                }
             }
 
             Trio<Integer, byte[], SocketChannel> data = readyReadQueue.poll();
@@ -109,13 +110,16 @@ public class Coordinator implements Runnable
                         {
                             for (Peer peer : connectedPeers)
                             {
-                                bitfieldOfPeer = peer.getBitfield();
-                                if (bitfieldOfPeer != null && bitfieldOfPeer.get(i))
+                                if(!peer.isChokedMe())
                                 {
-                                    ByteBuffer message = messageManager.generateRequest(i);
-                                    messageManager.sendMessage(peer.getSocket(), message);
-                                    asked[i] = true;
-                                    break;
+                                    bitfieldOfPeer = peer.getBitfield();
+                                    if (bitfieldOfPeer != null && bitfieldOfPeer.get(i))
+                                    {
+                                        ByteBuffer message = messageManager.generateRequest(i);
+                                        messageManager.sendMessage(peer.getSocket(), message);
+                                        asked[i] = true;
+                                        break;
+                                    }
                                 }
                             }
                         }

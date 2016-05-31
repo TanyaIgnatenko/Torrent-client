@@ -13,16 +13,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Reader implements Runnable
 {
     private static Logger logger = LogManager.getLogger("default_logger");
-    RandomAccessFile file;
-    int fileLength;
-    int pieceLength;
-    int piecesCount;
-    int lastPieceLength;
-    byte piece[];
-    byte lastPiece[];
+    private RandomAccessFile file;
+    private int fileLength;
+    private int pieceLength;
+    private int piecesCount;
+    private int lastPieceLength;
+    private byte piece[];
+    private byte lastPiece[];
+    private boolean stop;
 
-    BlockingQueue<Trio<Integer, byte[], SocketChannel>> readyQueue = new LinkedBlockingQueue<>();
-    BlockingQueue<Pair<Integer, SocketChannel>> mustReadQueue = new LinkedBlockingQueue<>();
+    private BlockingQueue<Trio<Integer, byte[], SocketChannel>> readyQueue = new LinkedBlockingQueue<>();
+    private BlockingQueue<Pair<Integer, SocketChannel>> mustReadQueue = new LinkedBlockingQueue<>();
 
     public Reader()
     {
@@ -61,8 +62,22 @@ public class Reader implements Runnable
 
     public void start()
     {
+        stop = false;
         Thread thread = new Thread(this, "Reader");
         thread.start();
+    }
+
+    public void stop()
+    {
+        stop = true;
+        try
+        {
+            file.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override

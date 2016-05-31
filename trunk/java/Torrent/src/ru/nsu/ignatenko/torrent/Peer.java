@@ -12,26 +12,8 @@ public class Peer
     private InetAddress ip;
     private int port;
     private boolean hasOurBitfield;
-
-    public synchronized void setBitfield(BitSet bitfield)
-    {
-        this.bitfield = bitfield;
-    }
-
-    public synchronized void setBit(int pieceIdx)
-    {
-       bitfield.set(pieceIdx);
-    }
-
-    public synchronized void setHasOurBitfield()
-    {
-        hasOurBitfield = true;
-    }
-
-    public synchronized void setSocket(SocketChannel socket)
-    {
-        this.socket = socket;
-    }
+    private boolean isInteresting;
+    private boolean chokedMe;
 
     public synchronized void setIp(InetAddress ip)
     {
@@ -48,29 +30,29 @@ public class Peer
         this.peerID = peerID;
     }
 
-    public synchronized boolean getHasOurBitfield()
+    public synchronized void setSocket(SocketChannel socket)
     {
-        return hasOurBitfield;
+        this.socket = socket;
     }
 
-    public synchronized boolean getBit(int pieceIdx)
+    public synchronized void setBitfield(BitSet bitfield)
     {
-        return bitfield.get(pieceIdx);
+        this.bitfield = bitfield;
     }
 
-    public synchronized BitSet getBitfield()
+    public synchronized void setHasOurBitfield()
     {
-        return bitfield;
+        hasOurBitfield = true;
     }
 
-    public synchronized byte[] getPeerID()
+    public void setInteresting(boolean interesting)
     {
-        return peerID;
+        isInteresting = interesting;
     }
 
-    public synchronized int getPort()
+    public void setChokedMe(boolean chokedMe)
     {
-        return port;
+        this.chokedMe = chokedMe;
     }
 
     public synchronized InetAddress getIp()
@@ -78,8 +60,38 @@ public class Peer
         return ip;
     }
 
+    public synchronized int getPort()
+    {
+        return port;
+    }
+
+    public synchronized byte[] getPeerID()
+    {
+        return peerID;
+    }
+
     public synchronized SocketChannel getSocket()
     {
         return socket;
+    }
+
+    public boolean isChokedMe()
+    {
+        return chokedMe;
+    }
+
+    public boolean isInteresting()
+    {
+        return isInteresting;
+    }
+
+    public synchronized boolean hasOurBitfield()
+    {
+        return hasOurBitfield;
+    }
+
+    public synchronized BitSet getBitfield()
+    {
+        return bitfield;
     }
 }

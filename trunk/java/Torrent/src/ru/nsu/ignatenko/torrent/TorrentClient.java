@@ -70,8 +70,8 @@ public class TorrentClient
                                       ourPeer, writer, torrentInfo);
 
         connectionManager = new ConnectionManager(messageManager, connectedPeers, ourPeer, torrentInfo);
-        connectionManager.workSelector();
-        connectionManager.startListen();
+        connectionManager.processIncomingConnections();
+        connectionManager.selectChannelsWithIncomingMessages();
         coordinator.start();
         reader.start();
         writer.start();
@@ -128,8 +128,8 @@ public class TorrentClient
                                       ourPeer, writer, torrentInfo);
 
         connectionManager = new ConnectionManager(messageManager, connectedPeers, ourPeer, torrentInfo);
-        connectionManager.workSelector();
-        connectionManager.startListen();
+        connectionManager.processIncomingConnections();
+        connectionManager.selectChannelsWithIncomingMessages();
         coordinator.start();
         reader.start();
     }
@@ -196,7 +196,6 @@ public class TorrentClient
         writer = new Writer();
 
         HashMap<Byte, Reaction> messageReactions = new HashMap<>();
-        messageReactions.put((byte)-1, new KeepAliveReaction());
         messageReactions.put((byte)0, new ChokeReaction());
         messageReactions.put((byte)1, new UnchokeReaction());
         messageReactions.put((byte)2, new InterestedReaction());

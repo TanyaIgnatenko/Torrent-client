@@ -8,8 +8,6 @@ public class MessageFactory
     {
         switch (id)
         {
-            case -1:
-                return new KeepAlive(length, peer);
             case 0:
                 return new Choke(length, peer);
             case 1:

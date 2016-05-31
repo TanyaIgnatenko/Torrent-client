@@ -277,3 +277,167 @@
 [INFO ] 2016-05-31 08:24:05.742 - Wrote a piece
 [INFO ] 2016-05-31 08:24:05.742 - Sended message 7 into socket in size 20009 bytes.
 [INFO ] 2016-05-31 08:24:05.744 - has all pieces!
+[INFO ] 2016-05-31 11:05:59.096 - Ready to listen port 6881
+[INFO ] 2016-05-31 11:05:59.257 - has all pieces!
+[INFO ] 2016-05-31 11:06:04.900 - Ready to listen port 6882
+[INFO ] 2016-05-31 11:06:04.993 - Try connect to some peer
+[INFO ] 2016-05-31 11:06:04.994 - Some peer want to connect to me
+[INFO ] 2016-05-31 11:06:04.994 - Receiving handshake...
+[INFO ] 2016-05-31 11:06:04.994 - Sending handshake...
+[INFO ] 2016-05-31 11:06:04.995 - Handshake sent 68 bytes.
+[INFO ] 2016-05-31 11:06:04.995 - Receiving handshake...
+[INFO ] 2016-05-31 11:06:04.998 - Successfully received 68 bytes of handshake.
+[INFO ] 2016-05-31 11:06:04.998 - Handshake sent 68 bytes.
+[INFO ] 2016-05-31 11:06:04.998 - Got valid handshake and sent my handshake to peer
+[INFO ] 2016-05-31 11:06:05.000 - Successfully received 68 bytes of handshake.
+[INFO ] 2016-05-31 11:06:05.001 - Got valid handshake
+[INFO ] 2016-05-31 11:06:05.001 - Coordinator found some peer without our bitfield
+[INFO ] 2016-05-31 11:06:05.001 - Generated bitfield message
+[INFO ] 2016-05-31 11:06:05.001 - In sendMessage size of message : 7
+[INFO ] 2016-05-31 11:06:05.002 - Sended message 5 into socket in size 7 bytes.
+[INFO ] 2016-05-31 11:06:05.003 - Coordinator found some peer without our bitfield
+[INFO ] 2016-05-31 11:06:05.003 - Generated bitfield message
+[INFO ] 2016-05-31 11:06:05.003 - In sendMessage size of message : 7
+[INFO ] 2016-05-31 11:06:05.003 - Sended message 5 into socket in size 7 bytes.
+[INFO ] 2016-05-31 11:06:05.052 - Received some message
+[INFO ] 2016-05-31 11:06:05.052 - With id 5
+[INFO ] 2016-05-31 11:06:05.052 - In bitfield parse 
+[INFO ] 2016-05-31 11:06:05.052 - In the end of bitfield react
+[INFO ] 2016-05-31 11:06:05.052 - In bitfield react
+[INFO ] 2016-05-31 11:06:05.052 - We reacted on bitfield
+[INFO ] 2016-05-31 11:06:05.053 - Generated request message
+[INFO ] 2016-05-31 11:06:05.053 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.054 - Sended message 6 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.054 - Generated request message
+[INFO ] 2016-05-31 11:06:05.054 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.054 - Sended message 6 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.054 - Generated request message
+[INFO ] 2016-05-31 11:06:05.054 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.054 - Sended message 6 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.054 - Generated request message
+[INFO ] 2016-05-31 11:06:05.054 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.054 - Sended message 6 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.054 - Generated request message
+[INFO ] 2016-05-31 11:06:05.054 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.055 - Sended message 6 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.055 - Generated request message
+[INFO ] 2016-05-31 11:06:05.055 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.055 - Sended message 6 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.055 - Generated request message
+[INFO ] 2016-05-31 11:06:05.055 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.055 - Sended message 6 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.055 - Generated request message
+[INFO ] 2016-05-31 11:06:05.055 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.055 - Sended message 6 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.294 - Received some message
+[INFO ] 2016-05-31 11:06:05.294 - With id 5
+[INFO ] 2016-05-31 11:06:05.294 - In bitfield parse 
+[INFO ] 2016-05-31 11:06:05.295 - In the end of bitfield react
+[INFO ] 2016-05-31 11:06:05.295 - In bitfield react
+[INFO ] 2016-05-31 11:06:05.296 - We reacted on bitfield
+[INFO ] 2016-05-31 11:06:05.296 - Received some message
+[INFO ] 2016-05-31 11:06:05.296 - With id 6
+[INFO ] 2016-05-31 11:06:05.297 - Received some message
+[INFO ] 2016-05-31 11:06:05.297 - With id 6
+[INFO ] 2016-05-31 11:06:05.297 - Received some message
+[INFO ] 2016-05-31 11:06:05.297 - With id 6
+[INFO ] 2016-05-31 11:06:05.297 - Received some message
+[INFO ] 2016-05-31 11:06:05.297 - With id 6
+[INFO ] 2016-05-31 11:06:05.297 - Received some message
+[INFO ] 2016-05-31 11:06:05.297 - With id 6
+[INFO ] 2016-05-31 11:06:05.297 - Received some message
+[INFO ] 2016-05-31 11:06:05.298 - With id 6
+[INFO ] 2016-05-31 11:06:05.298 - Received some message
+[INFO ] 2016-05-31 11:06:05.298 - With id 6
+[INFO ] 2016-05-31 11:06:05.298 - Received some message
+[INFO ] 2016-05-31 11:06:05.298 - With id 6
+[INFO ] 2016-05-31 11:06:05.303 - Read a last piece
+[INFO ] 2016-05-31 11:06:05.304 - Generated piece message
+[INFO ] 2016-05-31 11:06:05.305 - In sendMessage size of message : 20009
+[INFO ] 2016-05-31 11:06:05.305 - Sended message 7 into socket in size 20009 bytes.
+[INFO ] 2016-05-31 11:06:05.305 - Received some message
+[INFO ] 2016-05-31 11:06:05.305 - Generated piece message
+[INFO ] 2016-05-31 11:06:05.305 - With id 7
+[INFO ] 2016-05-31 11:06:05.305 - In sendMessage size of message : 20009
+[INFO ] 2016-05-31 11:06:05.305 - Sended message 7 into socket in size 20009 bytes.
+[INFO ] 2016-05-31 11:06:05.305 - Generated piece message
+[INFO ] 2016-05-31 11:06:05.305 - In sendMessage size of message : 20009
+[INFO ] 2016-05-31 11:06:05.305 - Sended message 7 into socket in size 20009 bytes.
+[INFO ] 2016-05-31 11:06:05.305 - Generated piece message
+[INFO ] 2016-05-31 11:06:05.306 - In sendMessage size of message : 15278
+[INFO ] 2016-05-31 11:06:05.306 - Received some message
+[INFO ] 2016-05-31 11:06:05.307 - With id 7
+[INFO ] 2016-05-31 11:06:05.307 - Sended message 7 into socket in size 15278 bytes.
+[INFO ] 2016-05-31 11:06:05.307 - Generated piece message
+[INFO ] 2016-05-31 11:06:05.307 - In sendMessage size of message : 20009
+[INFO ] 2016-05-31 11:06:05.318 - Received some message
+[INFO ] 2016-05-31 11:06:05.318 - With id 7
+[INFO ] 2016-05-31 11:06:05.319 - Sended message 7 into socket in size 20009 bytes.
+[INFO ] 2016-05-31 11:06:05.319 - Generated piece message
+[INFO ] 2016-05-31 11:06:05.319 - In sendMessage size of message : 20009
+[INFO ] 2016-05-31 11:06:05.319 - Received some message
+[INFO ] 2016-05-31 11:06:05.319 - With id 7
+[INFO ] 2016-05-31 11:06:05.320 - Sended message 7 into socket in size 20009 bytes.
+[INFO ] 2016-05-31 11:06:05.320 - Received some message
+[INFO ] 2016-05-31 11:06:05.320 - With id 7
+[INFO ] 2016-05-31 11:06:05.321 - Received some message
+[INFO ] 2016-05-31 11:06:05.321 - With id 7
+[INFO ] 2016-05-31 11:06:05.321 - Generated piece message
+[INFO ] 2016-05-31 11:06:05.321 - In sendMessage size of message : 20009
+[INFO ] 2016-05-31 11:06:05.321 - Sended message 7 into socket in size 20009 bytes.
+[INFO ] 2016-05-31 11:06:05.321 - Generated piece message
+[INFO ] 2016-05-31 11:06:05.321 - In sendMessage size of message : 20009
+[INFO ] 2016-05-31 11:06:05.322 - Sended message 7 into socket in size 20009 bytes.
+[INFO ] 2016-05-31 11:06:05.321 - Received some message
+[INFO ] 2016-05-31 11:06:05.323 - With id 7
+[INFO ] 2016-05-31 11:06:05.323 - Received some message
+[INFO ] 2016-05-31 11:06:05.323 - With id 7
+[INFO ] 2016-05-31 11:06:05.336 - Wrote a piece
+[INFO ] 2016-05-31 11:06:05.336 - Generated have message
+[INFO ] 2016-05-31 11:06:05.336 - Wrote a piece
+[INFO ] 2016-05-31 11:06:05.337 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.337 - Wrote a piece
+[INFO ] 2016-05-31 11:06:05.337 - Wrote a piece
+[INFO ] 2016-05-31 11:06:05.337 - Received some message
+[INFO ] 2016-05-31 11:06:05.337 - With id 4
+[INFO ] 2016-05-31 11:06:05.337 - Wrote a piece
+[INFO ] 2016-05-31 11:06:05.337 - Wrote a piece
+[INFO ] 2016-05-31 11:06:05.338 - Wrote a piece
+[INFO ] 2016-05-31 11:06:05.338 - Wrote a piece
+[INFO ] 2016-05-31 11:06:05.339 - Sended message 4 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.339 - Generated have message
+[INFO ] 2016-05-31 11:06:05.339 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.339 - Received some message
+[INFO ] 2016-05-31 11:06:05.339 - With id 4
+[INFO ] 2016-05-31 11:06:05.339 - Sended message 4 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.340 - Generated have message
+[INFO ] 2016-05-31 11:06:05.340 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.341 - Received some message
+[INFO ] 2016-05-31 11:06:05.341 - With id 4
+[INFO ] 2016-05-31 11:06:05.341 - Sended message 4 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.341 - Generated have message
+[INFO ] 2016-05-31 11:06:05.341 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.342 - Received some message
+[INFO ] 2016-05-31 11:06:05.342 - With id 4
+[INFO ] 2016-05-31 11:06:05.342 - Sended message 4 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.342 - Generated have message
+[INFO ] 2016-05-31 11:06:05.342 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.342 - Received some message
+[INFO ] 2016-05-31 11:06:05.343 - With id 4
+[INFO ] 2016-05-31 11:06:05.343 - Sended message 4 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.343 - Generated have message
+[INFO ] 2016-05-31 11:06:05.343 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.343 - Received some message
+[INFO ] 2016-05-31 11:06:05.343 - With id 4
+[INFO ] 2016-05-31 11:06:05.343 - Sended message 4 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.343 - Generated have message
+[INFO ] 2016-05-31 11:06:05.343 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.343 - Received some message
+[INFO ] 2016-05-31 11:06:05.343 - With id 4
+[INFO ] 2016-05-31 11:06:05.344 - Sended message 4 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.344 - Generated have message
+[INFO ] 2016-05-31 11:06:05.345 - In sendMessage size of message : 9
+[INFO ] 2016-05-31 11:06:05.345 - Received some message
+[INFO ] 2016-05-31 11:06:05.345 - With id 4
+[INFO ] 2016-05-31 11:06:05.345 - Sended message 4 into socket in size 9 bytes.
+[INFO ] 2016-05-31 11:06:05.345 - has all pieces!

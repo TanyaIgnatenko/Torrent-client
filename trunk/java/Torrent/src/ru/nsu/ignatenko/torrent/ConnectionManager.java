@@ -74,7 +74,7 @@ public class ConnectionManager implements Runnable
 		}
 	}
 
-	public void startListen()
+	public void processIncomingConnections()
 	{
 		Thread thread = new Thread(this, "Acceptor");
         stop = false;
@@ -164,55 +164,50 @@ public class ConnectionManager implements Runnable
 		}
 	}
 
-	public void workSelector()
+	public void selectChannelsWithIncomingMessages()
 	{
 		Thread thread = new Thread(new Runnable()
     {
         @Override
         public void run()
         {
-            SUPER_POOPER_METHOD();
-        }
-    }, "Input listener");
-		thread.start();
-	}
-
-	public void SUPER_POOPER_METHOD()
-	{
-		while(!stop)
-		{
-			try
+			while(!stop)
 			{
-				int numSelected = selector.select(30);
-				if(numSelected == 0)
+				try
 				{
-					continue;
-				}
-				Set<SelectionKey> selectedKeys = selector.selectedKeys();
-				Iterator<SelectionKey> iterator = selectedKeys.iterator();
-				while(iterator.hasNext())
-				{
-					SelectionKey key = iterator.next();
-					if(key.isReadable())
+					int numSelected = selector.select(30);
+					if(numSelected == 0)
 					{
-						try
+						continue;
+					}
+					Set<SelectionKey> selectedKeys = selector.selectedKeys();
+					Iterator<SelectionKey> iterator = selectedKeys.iterator();
+					while(iterator.hasNext())
+					{
+						SelectionKey key = iterator.next();
+						if(key.isReadable())
 						{
-							messageManager.receiveMessage((SocketChannel) key.channel(), (Peer) key.attachment());
-						}
-						catch (EOFException e)
-						{
-							logger.info("EOF got. No data in channel. Disconnecting...");
-							key.channel().close();
+							try
+							{
+								messageManager.receiveMessage((SocketChannel) key.channel(), (Peer) key.attachment());
+							}
+							catch (EOFException e)
+							{
+								logger.info("EOF got. No data in channel. Disconnecting...");
+								key.channel().close();
+							}
 						}
 					}
+					selectedKeys.clear();
 				}
-				selectedKeys.clear();
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-                throw new RuntimeException();
-			}
-		}
-	}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+					throw new RuntimeException();
+				}
+        }
+    }}, "Input listener");
+
+	thread.start();
+    }
 }

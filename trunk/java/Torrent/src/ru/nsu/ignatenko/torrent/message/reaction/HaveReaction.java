@@ -2,7 +2,10 @@ package ru.nsu.ignatenko.torrent.message.reaction;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.nsu.ignatenko.torrent.message.Have;
 import ru.nsu.ignatenko.torrent.message.Message;
+
+import java.util.BitSet;
 
 public class HaveReaction  extends Reaction
 {
@@ -11,6 +14,9 @@ public class HaveReaction  extends Reaction
     @Override
     public void react(Message message)
     {
-        logger.info("We did some react on have message.");
+        Have message_ = (Have) message;
+        int pieceIdx = message_.getPieceIdx();
+        BitSet bitfield = message.getPeer().getBitfield();
+        bitfield.set(pieceIdx);
     }
 }

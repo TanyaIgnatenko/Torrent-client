@@ -16,6 +16,5 @@ public class BitfieldReaction extends Reaction
         BitSet bitfield = BitSet.valueOf(message.getPayload());
         message.getPeer().setBitfield(bitfield);
         logger.info("We reacted on bitfield");
-
     }
 }

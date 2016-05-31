@@ -7,6 +7,6 @@ public class UnchokeReaction  extends Reaction
     @Override
     public void react(Message message)
     {
-
+        message.getPeer().setChokedMe(false);
     }
 }
