@@ -24,6 +24,7 @@ public class TorrentClient
     private Coordinator coordinator;
     private Reader reader;
     private Writer writer;
+    private InteractorWithUser userInteractor;
     private BlockingQueue<Peer> connectedPeers;
     private BlockingQueue<Peer> peers;
     private Peer ourPeer;
@@ -52,12 +53,10 @@ public class TorrentClient
 
     public void execute()
     {
-        InteractorWithUser userInteractor = new InteractorWithUser(this, peers);
+        userInteractor = new InteractorWithUser(this, peers);
         PeerBehaviour ourPeerBehaviour = userInteractor.getInfoAboutOurPeer();
 
         ourPeer = new Peer();
-        ourPeer.setPeerID("12345678901234567891".getBytes(Charset.forName("ASCII")));
-        
         if (ourPeerBehaviour.isCreator())
         {
             String pathToFile = ourPeerBehaviour.getPathToFile();
@@ -77,8 +76,8 @@ public class TorrentClient
             }
             if (ourPeerBehaviour.isSeeder())
             {
+                ourPeer.setSeeder(true);
                 String pathToFile = ourPeerBehaviour.getPathToFile();
-                ourPeer.setPeerID("12345678901234567890".getBytes(Charset.forName("ASCII")));
                 BitSet bitfield = new BitSet(torrentInfo.getPiecesCount());
                 for(int i = 0; i < torrentInfo.getPiecesCount(); ++i)
                 {
@@ -89,6 +88,7 @@ public class TorrentClient
             }
             else if(ourPeerBehaviour.isLeecher())
             {
+                ourPeer.setLeecher(true);
                 userInteractor.run();
                 String pathToFile = ourPeerBehaviour.getPathToDownloadDir() + torrentInfo.getFilename() ;
                 BitSet bitfield = new BitSet(torrentInfo.getPiecesCount());
@@ -133,7 +133,7 @@ public class TorrentClient
                 messageManager,
                 writer.getReadyWriteQueue(),
                 reader.getReadyReadQueue(),
-                ourPeer, writer, torrentInfo);
+                ourPeer, writer, torrentInfo, this, userInteractor);
 
         connectionManager = new ConnectionManager(messageManager, connectedPeers, ourPeer, torrentInfo);
         connectionManager.processIncomingConnections();

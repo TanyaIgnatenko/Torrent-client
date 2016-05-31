@@ -12,6 +12,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -47,7 +48,12 @@ public class ConnectionManager implements Runnable
 			{
 				serverSocket = ServerSocketChannel.open();
 				serverSocket.bind(new InetSocketAddress(port));
-				logger.info("Ready to listen port " + port);
+                ourPeer.setPort(port);
+                String peerID = "1234567890123456" + port;
+                ourPeer.setPeerID(peerID.getBytes(Charset.forName("ASCII")));
+                System.out.println("Ready to listen port " + port);
+                System.out.println("Set peerID: " + peerID);
+                logger.info("Ready to listen port " + port);
 			}
 			catch(IOException e)
 			{
