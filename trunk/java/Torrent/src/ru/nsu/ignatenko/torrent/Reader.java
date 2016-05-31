@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -20,7 +21,7 @@ public class Reader implements Runnable
     byte piece[];
     byte lastPiece[];
 
-    BlockingQueue<Trio> readyQueue = new LinkedBlockingQueue<>();
+    BlockingQueue<Trio<Integer, byte[], SocketChannel>> readyQueue = new LinkedBlockingQueue<>();
     BlockingQueue<Pair<Integer, SocketChannel>> mustReadQueue = new LinkedBlockingQueue<>();
 
     public Reader()
@@ -45,8 +46,12 @@ public class Reader implements Runnable
         try
         {
             File tmp = new File(path);
-            tmp.createNewFile();
             file = new RandomAccessFile(tmp, "r");
+        }
+        catch(FileNotFoundException e)
+        {
+            e.printStackTrace();
+            logger.info("Error: source file is missing.");
         }
         catch (IOException e)
         {
@@ -92,7 +97,7 @@ public class Reader implements Runnable
 //                logger.info("Piece is read : "+ new String(piece)+" "+piece.toString());
                 try
                 {
-                    readyQueue.put(new Trio(idx, piece, socket));
+                    readyQueue.put(new Trio<>(idx, Arrays.copyOf(piece, piece.length), socket));
                 }
                 catch(Exception e)
                 {
@@ -105,7 +110,7 @@ public class Reader implements Runnable
 //                logger.info("LastPiece is read : "+new String(lastPiece));
                 try
                 {
-                    readyQueue.put(new Trio(idx, lastPiece, socket));
+                    readyQueue.put(new Trio<>(idx, Arrays.copyOf(lastPiece, lastPiece.length), socket));
                 }
                 catch(Exception e)
                 {
@@ -125,7 +130,7 @@ public class Reader implements Runnable
         return mustReadQueue;
     }
 
-    public BlockingQueue<Trio> getReadyReadQueue()
+    public BlockingQueue<Trio<Integer, byte[], SocketChannel>> getReadyReadQueue()
     {
         return readyQueue;
     }

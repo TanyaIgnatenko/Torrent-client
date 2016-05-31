@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import ru.nsu.ignatenko.torrent.message.Bitfield;
 
 import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
@@ -17,7 +18,7 @@ public class Coordinator implements Runnable
     private Writer writer;
     private Reader reader;
     private ConnectionManager connectionManager;
-    private BlockingQueue<Trio> readyReadQueue;
+    private BlockingQueue<Trio<Integer, byte[], SocketChannel>> readyReadQueue;
 
     private BlockingQueue<Integer> readyWriteQueue;
 
@@ -30,7 +31,8 @@ public class Coordinator implements Runnable
     boolean stop = false;
 
     public Coordinator(BlockingQueue<Peer> connectedPeers, MessageManager messageManager,
-                       BlockingQueue<Integer>readyWriteQueue, BlockingQueue<Trio> readyReadQueue,
+                       BlockingQueue<Integer>readyWriteQueue,
+                       BlockingQueue<Trio<Integer, byte[], SocketChannel>> readyReadQueue,
                        Peer ourPeer, Writer writer, TorrentInfo torrentInfo)
     {
         this.readyReadQueue = readyReadQueue;
@@ -84,7 +86,7 @@ public class Coordinator implements Runnable
 //                }
             }
 
-            Trio data = readyReadQueue.poll();
+            Trio<Integer, byte[], SocketChannel> data = readyReadQueue.poll();
             if(data != null)
             {
 //                logger.info("Coordinator read from readyReadQueue: " + new String(data.second));
