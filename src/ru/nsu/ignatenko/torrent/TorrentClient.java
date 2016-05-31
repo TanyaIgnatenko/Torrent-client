@@ -1,6 +1,8 @@
 package ru.nsu.ignatenko.torrent;
 
 import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -10,6 +12,8 @@ import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.nsu.ignatenko.torrent.message.reaction.*;
 
 public class TorrentClient
@@ -20,16 +24,22 @@ public class TorrentClient
     private Coordinator coordinator;
     private Reader reader;
     private Writer writer;
-
     private BlockingQueue<Peer> connectedPeers;
+    private static Logger logger = LogManager.getLogger("default_logger");
 
     public void download(String[] args)
     {
         String pathToTorrent = args[0];
-        DataInputStream torrentFile = new DataInputStream(
-                ClassLoader.getSystemClassLoader().getResourceAsStream(pathToTorrent));
+        TorrentInfo torrentInfo = null;
+        try(DataInputStream torrentFile = new DataInputStream(new FileInputStream(pathToTorrent)))
+        {
+            torrentInfo = Bencoder.parser(torrentFile);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
 
-        TorrentInfo torrentInfo = Bencoder.parser(torrentFile);
         String pathToFile = args[1] + torrentInfo.getFilename();
         torrentInfo.setPath(pathToFile);
 
@@ -38,7 +48,8 @@ public class TorrentClient
 
         BitSet bitfield = new BitSet(torrentInfo.getPiecesCount());
         ourPeer.setBitfield(bitfield);
-        Peer[] peers = getPeersInfo();
+        int max_num_peers = args.length/2 - 1;
+        Peer[] peers = getPeersInfo(max_num_peers);
 
         writer.initiate(torrentInfo.getFilename(),
                         torrentInfo.getPath(),
@@ -47,10 +58,10 @@ public class TorrentClient
                         torrentInfo.getPiecesCount());
 
         reader.initiate(torrentInfo.getFilename(),
-                        torrentInfo.getPath(),
-                        torrentInfo.getFileLength(),
-                        torrentInfo.getPieceLength(),
-                        torrentInfo.getPiecesCount());
+                torrentInfo.getPath(),
+                torrentInfo.getFileLength(),
+                torrentInfo.getPieceLength(),
+                torrentInfo.getPiecesCount());
 
         coordinator = new Coordinator(connectedPeers,
                                       messageManager,
@@ -98,17 +109,17 @@ public class TorrentClient
         ourPeer.setBitfield(bitfield);
 
 
-        writer.initiate(torrentInfo.getFilename(),
+        reader.initiate(torrentInfo.getFilename(),
                 torrentInfo.getPath(),
                 torrentInfo.getFileLength(),
                 torrentInfo.getPieceLength(),
                 torrentInfo.getPiecesCount());
 
-        reader.initiate(torrentInfo.getFilename(),
-                        torrentInfo.getPath(),
-                        torrentInfo.getFileLength(),
-                        torrentInfo.getPieceLength(),
-                        torrentInfo.getPiecesCount());
+        writer.initiate(torrentInfo.getFilename(),
+                torrentInfo.getPath(),
+                torrentInfo.getFileLength(),
+                torrentInfo.getPieceLength(),
+                torrentInfo.getPiecesCount());
 
         coordinator = new Coordinator(connectedPeers,
                                       messageManager,
@@ -123,11 +134,16 @@ public class TorrentClient
         reader.start();
     }
 
-    private Peer[] getPeersInfo()
+    private Peer[] getPeersInfo(int max_num_peers)
     {
 //        System.out.println("Print how much peers has this torrent:");
 //        Scanner scan = new Scanner(System.in);
 //        int size = scan.nextInt();
+//        if(size > max_num_peers)
+//        {
+//            logger.info("Error: not enough arguments for that count of peers.");
+//            throw new RuntimeException();
+//        }
 //        Peer peers[] =  new Peer[size];
 //
 //        byte[] peerID;
@@ -195,10 +211,15 @@ public class TorrentClient
 
     public static void main(String[] args)
     {
+        if(args.length < 2)
+        {
+            logger.info("Error: not enough arguments.");
+            throw new RuntimeException();
+        }
         TorrentClient client = new TorrentClient();
 
         Scanner scan = new Scanner(System.in);
-        System.out.println("Do you want to download? -y/n");
+        System.out.println("Do you want to download? y/n");
         if(scan.next().equals("y"))
         {
             client.download(args);

@@ -30,11 +30,11 @@ public class ConnectionManager implements Runnable
 	private ServerSocketChannel serverSocket;
 	private BlockingQueue<Peer> connectedPeers;
 	private TorrentInfo torrentInfo;
-	Peer ourPeer;
+	private Peer ourPeer;
 
 	private Selector selector;
 	private MessageManager messageManager;
-	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(4, 4, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(30));
+//	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(4, 4, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(30));
 	private boolean stop = false;
 
 
@@ -77,6 +77,7 @@ public class ConnectionManager implements Runnable
 	public void startListen()
 	{
 		Thread thread = new Thread(this, "Acceptor");
+        stop = false;
 		thread.start();
 	}
 
@@ -86,14 +87,13 @@ public class ConnectionManager implements Runnable
 		{
 			logger.info("Try connect to some peer");
 			SocketChannel client = SocketChannel.open(new InetSocketAddress(peer.getIp(), peer.getPort()));
-			messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getInfoHash());
-				logger.info("Sending handshake...");
-				int bytesWrote = messageManager.sendHandshake(client);
-				logger.info("Handshake sent " + bytesWrote + " bytes.");
-				logger.info("Receiving handshake...");
-				Handshake clientHandshake = messageManager.receiveHandshake(client);
+            messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getInfoHash());
+            logger.info("Sending handshake...");
+            int bytesWrote = messageManager.sendHandshake(client);
+            logger.info("Handshake sent " + bytesWrote + " bytes.");
+            logger.info("Receiving handshake...");
+            Handshake clientHandshake = messageManager.receiveHandshake(client);
 			if(!messageManager.isValidHandshake(clientHandshake, peer.getPeerID()))
-//			if(!messageManager.isValidHandshake(clientHandshake))
 			{
 				logger.info("Invalid handshake. Dropping connection...");
 				client.close();
@@ -167,13 +167,13 @@ public class ConnectionManager implements Runnable
 	public void workSelector()
 	{
 		Thread thread = new Thread(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				SUPER_POOPER_METHOD();
-			}
-		}, "Input listener");
+    {
+        @Override
+        public void run()
+        {
+            SUPER_POOPER_METHOD();
+        }
+    }, "Input listener");
 		thread.start();
 	}
 
