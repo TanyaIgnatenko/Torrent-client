@@ -23,7 +23,6 @@ public class Bitfield  extends Message
 
     public void parse(SocketChannel socket)
     {
-        logger.info("In bitfield parse ");
        ByteBuffer data = ByteBuffer.allocate(length);
        try
        {
@@ -35,7 +34,6 @@ public class Bitfield  extends Message
        }
        data.rewind();
        data.get(bitfield);
-        logger.info("In the end of bitfield react");
     }
 
     @Override
