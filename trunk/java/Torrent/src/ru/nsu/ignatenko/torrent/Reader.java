@@ -54,10 +54,6 @@ public class Reader implements Runnable
             e.printStackTrace();
             logger.info("Error: source file is missing.");
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
     }
 
     public void start()

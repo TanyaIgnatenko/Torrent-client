@@ -89,12 +89,11 @@ public class TorrentClient
             else if(ourPeerBehaviour.isLeecher())
             {
                 ourPeer.setLeecher(true);
-                userInteractor.run();
                 String pathToFile = ourPeerBehaviour.getPathToDownloadDir() + torrentInfo.getFilename() ;
                 BitSet bitfield = new BitSet(torrentInfo.getPiecesCount());
                 ourPeer.setBitfield(bitfield);
                 start(torrentInfo, pathToFile);
-                
+                userInteractor.run();
                 while(!stop)
                 {
                     for (Peer peer : peers)
@@ -155,7 +154,11 @@ public class TorrentClient
 //        reader.stop();
 //        connectionManager.stop();
 //        coordinator.stop();
+    }
 
+    public Peer getOurPeer()
+    {
+        return ourPeer;
     }
 
     public static void main(String[] args)

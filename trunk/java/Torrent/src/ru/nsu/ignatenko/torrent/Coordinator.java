@@ -85,7 +85,6 @@ public class Coordinator implements Runnable
                     messageManager.sendMessage(peer.getSocket(), message);
                 }
             }
-
             Integer pieceIdx = readyWriteQueue.poll();
             if(pieceIdx != null)
             {
@@ -98,7 +97,6 @@ public class Coordinator implements Runnable
                     message.flip();
                 }
             }
-
             Trio<Integer, byte[], SocketChannel> data = readyReadQueue.poll();
             if(data != null)
             {
@@ -106,14 +104,12 @@ public class Coordinator implements Runnable
                 ByteBuffer message = messageManager.generatePiece(data.second, data.first);
                 messageManager.sendMessage(data.third, message);
             }
-
             if (!stop)
             {
                 has_all = true;
 
                 BitSet bitfieldOfPeer;
                 BitSet bitfield = ourPeer.getBitfield();
-
                 for (int i = 0; i < torrentInfo.getPiecesCount(); ++i)
                 {
                     if (!bitfield.get(i))

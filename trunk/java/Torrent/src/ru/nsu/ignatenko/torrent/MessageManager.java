@@ -144,10 +144,6 @@ public class MessageManager
     {
         try
         {
-//            logger.info("In sendMessage size of message : "+message.remaining());
-//            int bytesWrote = socket.write(message);
-//            byte id = message.get(4);
-//            logger.info("Sended message {} into socket in size {} bytes.", id, bytesWrote);
             int bytesWrote;
             logger.info("In sendMessage size of message : " + message.remaining());
             while ((bytesWrote = socket.write(message)) == 0);
@@ -203,7 +199,7 @@ public class MessageManager
     public ByteBuffer generatePiece(byte[] piece, int pieceIdx)
     {
 //        logger.info("In generatePiece length of piece: " + piece.length+ "\n piece: "+new String(piece));
-        int length = piece.length + 4 +  1;
+        int length = piece.length + 4 + 1;
         ByteBuffer message = ByteBuffer.allocate(length + 4);
         byte id = 7;
         message.putInt(length);
