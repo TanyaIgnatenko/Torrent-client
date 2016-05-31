@@ -14,6 +14,9 @@ public class Peer
     private boolean hasOurBitfield;
     private boolean isInteresting;
     private boolean chokedMe;
+    private int numDoneRequests;
+    private boolean isLeecher;
+    private boolean isSeeder;
 
     public synchronized void setIp(InetAddress ip)
     {
@@ -55,6 +58,16 @@ public class Peer
         this.chokedMe = chokedMe;
     }
 
+    public void setLeecher(boolean leecher)
+    {
+        isLeecher = leecher;
+    }
+
+    public void setSeeder(boolean seeder)
+    {
+        isSeeder = seeder;
+    }
+
     public synchronized InetAddress getIp()
     {
         return ip;
@@ -93,5 +106,22 @@ public class Peer
     public synchronized BitSet getBitfield()
     {
         return bitfield;
+    }
+
+    public synchronized void increaseNumDoneRequests(){++numDoneRequests;}
+
+    public int getNumDoneRequests()
+    {
+        return numDoneRequests;
+    }
+
+    public boolean isLeecher()
+    {
+        return isLeecher;
+    }
+
+    public boolean isSeeder()
+    {
+        return isSeeder;
     }
 }
