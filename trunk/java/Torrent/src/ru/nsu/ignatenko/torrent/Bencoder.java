@@ -27,7 +27,7 @@ public class Bencoder
 //        }
 
         torrentInfo.setFilename("image2.jpg");
-        torrentInfo.setPieceLength(20000);
+        torrentInfo.setPieceLength(255);
         torrentInfo.setInfoHash("infohashinfohashinfohash1234".getBytes((Charset.forName("ASCII"))));
         torrentInfo.setFileLength(155269);
         return torrentInfo;

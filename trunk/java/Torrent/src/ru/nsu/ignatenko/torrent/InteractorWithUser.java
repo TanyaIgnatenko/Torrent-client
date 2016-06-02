@@ -1,5 +1,6 @@
 package ru.nsu.ignatenko.torrent;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -56,72 +57,72 @@ class InteractorWithUser
 
     public void run()
     {
-//        System.out.println("Input format:\n" +
-//                "To tell about peer that has this torrent use: [peerID] [ip] [port]\n" +
-//                "To stop work of torrent client use: stop");
-//
-//            Scanner scanner = new Scanner(System.in);
-//            String input = scanner.next();
-//            if (input.equals("stop"))
-//            {
-//                stop = true;
-//            }
-//            else
-//            {
-//                try
-//                {
-//                    Peer peer = new Peer();
-//                    peer.setPeerID(input.getBytes(Charset.forName("ASCII")));
-//                    peer.setIp(InetAddress.getByName(scanner.next()));
-//                    peer.setPort(scanner.nextInt());
-//                    peers.put(peer);
-//                }
-//                catch (UnknownHostException e)
-//                {
-//                    System.out.println("Error: wrong Ip.");
-//                    e.printStackTrace();
-//                }
-//                catch (InterruptedException e)
-//                {
-//                    e.printStackTrace();
-//                }
-//            }
+        System.out.println("Input format:\n" +
+                "To tell about peer that has this torrent use: [peerID] [ip] [port]\n" +
+                "To stop work of torrent client use: stop");
 
-        try
-        {
-            Peer peer = new Peer();
-            peer.setPeerID("12345678901234566881".getBytes(Charset.forName("ASCII")));
-            peer.setIp(InetAddress.getByName("127.0.0.1"));
-            peer.setPort(6881);
-            peers.put(peer);
-        }
-        catch (UnknownHostException e)
-        {
-            e.printStackTrace();
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-        try
-        {
-            if(torrentClient.getOurPeer().getPort() != 6882)
+            Scanner scanner = new Scanner(System.in);
+            String input = scanner.next();
+            if (input.equals("stop"))
             {
-                Peer peer = new Peer();
-                peer.setPeerID("12345678901234566882".getBytes(Charset.forName("ASCII")));
-                peer.setIp(InetAddress.getByName("127.0.0.1"));
-                peer.setPort(6882);
-                peers.put(peer);
+                   torrentClient.stop();
             }
-        }
-        catch (UnknownHostException e)
-        {
-            e.printStackTrace();
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
+            else
+            {
+                try
+                {
+                    Peer peer = new Peer();
+                    peer.setPeerID(input.getBytes(Charset.forName("ASCII")));
+                    peer.setIp(InetAddress.getByName(scanner.next()));
+                    peer.setPort(scanner.nextInt());
+                    peers.put(peer);
+                }
+                catch (UnknownHostException e)
+                {
+                    System.out.println("Error: wrong Ip.");
+                    e.printStackTrace();
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
+//        try
+//        {
+//            Peer peer = new Peer();
+//            peer.setPeerID("12345678901234566881".getBytes(Charset.forName("ASCII")));
+//            peer.setIp(InetAddress.getByName("127.0.0.1"));
+//            peer.setPort(6881);
+//            peers.put(peer);
+//        }
+//        catch (UnknownHostException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        catch (InterruptedException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        try
+//        {
+//            if(torrentClient.getOurPeer().getPort() != 6882)
+//            {
+//                Peer peer = new Peer();
+//                peer.setPeerID("12345678901234566882".getBytes(Charset.forName("ASCII")));
+//                peer.setIp(InetAddress.getByName("127.0.0.1"));
+//                peer.setPort(6882);
+//                peers.put(peer);
+//            }
+//        }
+//        catch (UnknownHostException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        catch (InterruptedException e)
+//        {
+//            e.printStackTrace();
+//        }
     }
 
     public void printStatistics(BlockingQueue<Peer> connectedPeers)

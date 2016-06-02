@@ -110,6 +110,8 @@ public class Peer
 
     public synchronized void increaseNumDoneRequests(){++numDoneRequests;}
 
+    public synchronized void decreaseNumDoneRequests(){--numDoneRequests;}
+
     public int getNumDoneRequests()
     {
         return numDoneRequests;
@@ -124,4 +126,6 @@ public class Peer
     {
         return isSeeder;
     }
+
+
 }

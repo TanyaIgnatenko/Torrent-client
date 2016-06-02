@@ -235,7 +235,16 @@ public class MessageManager
     {
         ByteBuffer data1 = ByteBuffer.allocate(4);
 
-        int count = socket.read(data1);
+        int count = 0;
+        try
+        {
+            count = socket.read(data1);
+        }
+        catch (IOException e)
+        {
+            socket.close();
+            return;
+        }
         if (count == -1)
         {
             throw new EOFException();
