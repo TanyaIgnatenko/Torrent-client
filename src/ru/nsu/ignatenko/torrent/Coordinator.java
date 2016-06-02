@@ -62,11 +62,7 @@ public class Coordinator implements Runnable
         boolean asked[] = new boolean[torrentInfo.getPiecesCount()];
         while (true)
         {
-            int n = 0;
-            if(!connectedPeers.isEmpty())
-            {
-                n = torrentInfo.getPiecesCount() / connectedPeers.size() + 1;
-            }
+      int n = 4;
             for (Peer peer : connectedPeers)
             {
                 if (!peer.hasOurBitfield())

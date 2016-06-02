@@ -191,7 +191,7 @@ public class ConnectionManager implements Runnable
 					while(iterator.hasNext())
 					{
 						SelectionKey key = iterator.next();
-						if(key.isReadable())
+						if(key.isValid())
 						{
 							try
 							{
@@ -202,6 +202,11 @@ public class ConnectionManager implements Runnable
 								logger.info("EOF got. No data in channel. Disconnecting...");
 								key.channel().close();
 							}
+						}
+						else
+						{
+							logger.info("Key is not valid.");
+							key.channel().close();
 						}
 					}
 					selectedKeys.clear();

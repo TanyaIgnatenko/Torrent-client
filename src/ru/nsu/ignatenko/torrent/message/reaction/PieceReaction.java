@@ -10,7 +10,6 @@ import java.util.concurrent.BlockingQueue;
 
 public class PieceReaction extends Reaction
 {
-    private BlockingQueue<Peer> connectedPeers;
     private BlockingQueue<Pair<Integer, byte[]>> mustWriteQueue;
 
     public PieceReaction(BlockingQueue<Pair<Integer, byte[]>> mustWriteQueue)
@@ -25,6 +24,7 @@ public class PieceReaction extends Reaction
         byte[] piece = message.getPiece();
         try
         {
+            message.getPeer().decreaseNumDoneRequests();
             mustWriteQueue.put(new Pair<>(pieceIdx, Arrays.copyOf(piece, piece.length)));
         }
         catch (InterruptedException e)

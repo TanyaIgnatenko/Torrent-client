@@ -50,6 +50,7 @@ public class TorrentClient
         messageReactions.put((byte)8, new CancelReaction(reader.getMustReadQueue()));
         messageManager = new MessageManager(messageReactions);
     }
+    public void createTorrent(String pathToFile) {}
 
     public void execute()
     {
@@ -96,17 +97,17 @@ public class TorrentClient
                 userInteractor.run();
                 while(!stop)
                 {
-                    for (Peer peer : peers)
+                    try
                     {
-                        if (connectedPeers.size() != MAX_NUM_PEERS)
+                        while(connectedPeers.size() == MAX_NUM_PEERS)
                         {
-                            connectionManager.connectTo(peer);
-                            peers.poll();
+                            connectedPeers.wait();
                         }
-                        else
-                        {
-                            break;
-                        }
+                        connectionManager.connectTo(peers.take());
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -142,18 +143,19 @@ public class TorrentClient
         writer.start();
     }
 
-    public void createTorrent(String pathToFile)
-    {
-
-    }
-
-
     public void stop()
     {
-//        writer.stop();
-//        reader.stop();
-//        connectionManager.stop();
-//        coordinator.stop();
+        for(Peer peer: connectedPeers)
+        {
+            try
+            {
+                peer.getSocket().close();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 
     public Peer getOurPeer()
