@@ -2,3 +2,118 @@
 [INFO ] 2016-06-04 00:21:53.816 - has all pieces!
 [INFO ] 2016-06-04 00:22:58.348 - Ready to listen port 6881
 [INFO ] 2016-06-04 00:22:58.549 - has all pieces!
+[INFO ] 2016-06-04 01:54:23.679 - Ready to listen port 6881
+[INFO ] 2016-06-04 01:54:23.828 - has all pieces!
+[INFO ] 2016-06-04 02:18:04.124 - Ready to listen port 6881
+[INFO ] 2016-06-04 02:18:04.284 - has all pieces!
+[INFO ] 2016-06-04 02:18:55.848 - Ready to listen port 6882
+[INFO ] 2016-06-04 02:19:04.307 - Try connect to some peer
+[INFO ] 2016-06-04 02:19:04.308 - Sending handshake...
+[INFO ] 2016-06-04 02:19:04.308 - Handshake sent 68 bytes.
+[INFO ] 2016-06-04 02:19:04.308 - Receiving handshake...
+[INFO ] 2016-06-04 02:19:04.309 - Some peer want to connect to me
+[INFO ] 2016-06-04 02:19:04.309 - Receiving handshake...
+[INFO ] 2016-06-04 02:19:04.312 - Successfully received 68 bytes of handshake.
+[INFO ] 2016-06-04 02:19:04.312 - Handshake sent 68 bytes.
+[INFO ] 2016-06-04 02:19:04.312 - Got valid handshake and sent my handshake to peer
+[INFO ] 2016-06-04 02:19:04.313 - Coordinator found some peer without our bitfield
+[INFO ] 2016-06-04 02:19:04.313 - Generated bitfield message
+[INFO ] 2016-06-04 02:19:04.314 - In sendMessage size of message : 6
+[INFO ] 2016-06-04 02:19:04.314 - Sended message 5 into socket in size 6 bytes.
+[INFO ] 2016-06-04 02:19:04.316 - Successfully received 68 bytes of handshake.
+[INFO ] 2016-06-04 02:19:04.316 - Got valid handshake
+[INFO ] 2016-06-04 02:19:04.318 - Coordinator found some peer without our bitfield
+[INFO ] 2016-06-04 02:19:04.318 - Generated bitfield message
+[INFO ] 2016-06-04 02:19:04.318 - In sendMessage size of message : 6
+[INFO ] 2016-06-04 02:19:04.321 - Sended message 5 into socket in size 6 bytes.
+[INFO ] 2016-06-04 02:19:04.612 - Received some message
+[INFO ] 2016-06-04 02:19:04.612 - With id 5
+[INFO ] 2016-06-04 02:19:04.612 - In bitfield react
+[INFO ] 2016-06-04 02:19:04.613 - We reacted on bitfield
+[INFO ] 2016-06-04 02:19:04.613 - Generated request message
+[INFO ] 2016-06-04 02:19:04.614 - In sendMessage size of message : 9
+[INFO ] 2016-06-04 02:19:04.615 - Sended message 6 into socket in size 9 bytes.
+[INFO ] 2016-06-04 02:19:04.620 - Received some message
+[INFO ] 2016-06-04 02:19:04.620 - With id 5
+[INFO ] 2016-06-04 02:19:04.621 - In bitfield react
+[INFO ] 2016-06-04 02:19:04.625 - We reacted on bitfield
+[INFO ] 2016-06-04 02:19:04.626 - Received some message
+[INFO ] 2016-06-04 02:19:04.626 - With id 6
+[INFO ] 2016-06-04 02:19:04.628 - Read a last piece
+[INFO ] 2016-06-04 02:19:04.678 - Generated piece message
+[INFO ] 2016-06-04 02:19:04.678 - In sendMessage size of message : 86
+[INFO ] 2016-06-04 02:19:04.678 - Sended message 7 into socket in size 86 bytes.
+[INFO ] 2016-06-04 02:19:04.694 - Received some message
+[INFO ] 2016-06-04 02:19:04.694 - With id 7
+[INFO ] 2016-06-04 02:19:04.792 - Generated have message
+[INFO ] 2016-06-04 02:19:04.792 - Wrote a piece
+[INFO ] 2016-06-04 02:19:04.792 - In sendMessage size of message : 9
+[INFO ] 2016-06-04 02:19:04.792 - Received some message
+[INFO ] 2016-06-04 02:19:04.792 - With id 4
+[INFO ] 2016-06-04 02:19:04.793 - Sended message 4 into socket in size 9 bytes.
+[INFO ] 2016-06-04 02:19:04.793 - has all pieces!
+[INFO ] 2016-06-04 02:20:48.453 - EOF got. No data in channel. Disconnecting...
+[INFO ] 2016-06-04 02:21:47.203 - Ready to listen port 6881
+[INFO ] 2016-06-04 02:21:47.365 - has all pieces!
+[INFO ] 2016-06-04 02:22:03.209 - Ready to listen port 6882
+[INFO ] 2016-06-04 02:22:16.039 - Try connect to some peer
+[INFO ] 2016-06-04 02:22:16.040 - Sending handshake...
+[INFO ] 2016-06-04 02:22:16.040 - Handshake sent 68 bytes.
+[INFO ] 2016-06-04 02:22:16.040 - Receiving handshake...
+[INFO ] 2016-06-04 02:22:16.040 - Some peer want to connect to me
+[INFO ] 2016-06-04 02:22:16.041 - Receiving handshake...
+[INFO ] 2016-06-04 02:22:16.043 - Successfully received 68 bytes of handshake.
+[INFO ] 2016-06-04 02:22:16.043 - Handshake sent 68 bytes.
+[INFO ] 2016-06-04 02:22:16.043 - Got valid handshake and sent my handshake to peer
+[INFO ] 2016-06-04 02:22:16.045 - Successfully received 68 bytes of handshake.
+[INFO ] 2016-06-04 02:22:16.045 - Got valid handshake
+[INFO ] 2016-06-04 02:22:16.046 - Coordinator found some peer without our bitfield
+[INFO ] 2016-06-04 02:22:16.046 - Coordinator found some peer without our bitfield
+[INFO ] 2016-06-04 02:22:16.046 - Generated bitfield message
+[INFO ] 2016-06-04 02:22:16.047 - In sendMessage size of message : 6
+[INFO ] 2016-06-04 02:22:16.047 - Sended message 5 into socket in size 6 bytes.
+[INFO ] 2016-06-04 02:22:16.054 - Generated bitfield message
+[INFO ] 2016-06-04 02:22:16.055 - In sendMessage size of message : 6
+[INFO ] 2016-06-04 02:22:16.057 - Received some message
+[INFO ] 2016-06-04 02:22:16.057 - With id 5
+[INFO ] 2016-06-04 02:22:16.057 - In bitfield react
+[INFO ] 2016-06-04 02:22:16.057 - We reacted on bitfield
+[INFO ] 2016-06-04 02:22:16.058 - Sended message 5 into socket in size 6 bytes.
+[INFO ] 2016-06-04 02:22:16.414 - Received some message
+[INFO ] 2016-06-04 02:22:16.414 - With id 5
+[INFO ] 2016-06-04 02:22:16.415 - In bitfield react
+[INFO ] 2016-06-04 02:22:16.415 - Generated request message
+[INFO ] 2016-06-04 02:22:16.415 - In sendMessage size of message : 9
+[INFO ] 2016-06-04 02:22:16.415 - Sended message 6 into socket in size 9 bytes.
+[INFO ] 2016-06-04 02:22:16.416 - Generated request message
+[INFO ] 2016-06-04 02:22:16.416 - In sendMessage size of message : 9
+[INFO ] 2016-06-04 02:22:16.416 - Sended message 6 into socket in size 9 bytes.
+[INFO ] 2016-06-04 02:22:16.421 - Received some message
+[INFO ] 2016-06-04 02:22:16.422 - With id 6
+[INFO ] 2016-06-04 02:22:16.422 - Received some message
+[INFO ] 2016-06-04 02:22:16.423 - With id 6
+[INFO ] 2016-06-04 02:22:16.423 - Read a last piece
+[INFO ] 2016-06-04 02:22:16.423 - Generated piece message
+[INFO ] 2016-06-04 02:22:16.427 - In sendMessage size of message : 268
+[INFO ] 2016-06-04 02:22:16.427 - Sended message 7 into socket in size 268 bytes.
+[INFO ] 2016-06-04 02:22:16.428 - Generated piece message
+[INFO ] 2016-06-04 02:22:16.428 - In sendMessage size of message : 1033
+[INFO ] 2016-06-04 02:22:16.415 - We reacted on bitfield
+[INFO ] 2016-06-04 02:22:16.428 - Received some message
+[INFO ] 2016-06-04 02:22:16.428 - With id 7
+[INFO ] 2016-06-04 02:22:16.429 - Received some message
+[INFO ] 2016-06-04 02:22:16.429 - With id 7
+[INFO ] 2016-06-04 02:22:16.430 - Wrote a piece
+[INFO ] 2016-06-04 02:22:16.431 - Wrote a piece
+[INFO ] 2016-06-04 02:22:16.431 - Generated have message
+[INFO ] 2016-06-04 02:22:16.431 - In sendMessage size of message : 9
+[INFO ] 2016-06-04 02:22:16.431 - Received some message
+[INFO ] 2016-06-04 02:22:16.431 - With id 4
+[INFO ] 2016-06-04 02:22:16.432 - Sended message 4 into socket in size 9 bytes.
+[INFO ] 2016-06-04 02:22:16.432 - Generated have message
+[INFO ] 2016-06-04 02:22:16.432 - In sendMessage size of message : 9
+[INFO ] 2016-06-04 02:22:16.433 - Received some message
+[INFO ] 2016-06-04 02:22:16.433 - With id 4
+[INFO ] 2016-06-04 02:22:16.433 - Sended message 4 into socket in size 9 bytes.
+[INFO ] 2016-06-04 02:22:16.434 - has all pieces!
+[INFO ] 2016-06-04 02:22:16.428 - Sended message 7 into socket in size 1033 bytes.
