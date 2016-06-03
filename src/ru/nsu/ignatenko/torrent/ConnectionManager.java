@@ -199,8 +199,11 @@ public class ConnectionManager implements Runnable
 							catch (EOFException e)
 							{
 								logger.info("EOF got. No data in channel. Disconnecting...");
-								connectedPeers.remove(key.attachment());
-								connectedPeers.notify();
+								synchronized (connectedPeers)
+								{
+									connectedPeers.remove(key.attachment());
+									connectedPeers.notify();
+								}
 								key.channel().close();
 							}
 						}

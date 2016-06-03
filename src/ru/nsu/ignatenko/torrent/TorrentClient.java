@@ -95,11 +95,14 @@ public class TorrentClient
                 {
                     try
                     {
-                        while(connectedPeers.size() == MAX_NUM_PEERS)
+                        synchronized (connectedPeers)
                         {
-                            connectedPeers.wait();
+                            while (connectedPeers.size() == MAX_NUM_PEERS)
+                            {
+                                connectedPeers.wait();
+                            }
+                            connectionManager.connectTo(peers.take());
                         }
-                        connectionManager.connectTo(peers.take());
                     }
                     catch (InterruptedException e)
                     {
