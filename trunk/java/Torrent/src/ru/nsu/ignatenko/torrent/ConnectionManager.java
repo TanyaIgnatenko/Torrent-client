@@ -35,7 +35,6 @@ public class ConnectionManager implements Runnable
 
 	private Selector selector;
 	private MessageManager messageManager;
-//	private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(4, 4, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(30));
 	private boolean stop = false;
 
 
@@ -200,6 +199,8 @@ public class ConnectionManager implements Runnable
 							catch (EOFException e)
 							{
 								logger.info("EOF got. No data in channel. Disconnecting...");
+								connectedPeers.remove(key.attachment());
+								connectedPeers.notify();
 								key.channel().close();
 							}
 						}

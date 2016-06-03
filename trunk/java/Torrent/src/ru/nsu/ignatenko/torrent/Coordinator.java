@@ -115,7 +115,7 @@ public class Coordinator implements Runnable
                         {
                             for (Peer peer : connectedPeers)
                             {
-                                if(!peer.isChokedMe() && peer.getNumDoneRequests() <= n)
+                                if(!peer.isChokedMe() && peer.getNumDoneRequestsForTime() <= n)
                                 {
                                     bitfieldOfPeer = peer.getBitfield();
                                     if (bitfieldOfPeer != null && bitfieldOfPeer.get(i))

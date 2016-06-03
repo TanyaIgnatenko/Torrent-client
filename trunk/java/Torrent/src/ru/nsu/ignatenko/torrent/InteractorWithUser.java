@@ -1,6 +1,5 @@
 package ru.nsu.ignatenko.torrent;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;

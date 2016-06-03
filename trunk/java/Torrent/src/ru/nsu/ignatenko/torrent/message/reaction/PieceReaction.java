@@ -1,7 +1,6 @@
 package ru.nsu.ignatenko.torrent.message.reaction;
 
 import ru.nsu.ignatenko.torrent.Pair;
-import ru.nsu.ignatenko.torrent.Peer;
 import ru.nsu.ignatenko.torrent.message.Message;
 import ru.nsu.ignatenko.torrent.message.Piece;
 
