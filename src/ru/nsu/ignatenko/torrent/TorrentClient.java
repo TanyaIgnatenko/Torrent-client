@@ -46,7 +46,6 @@ public class TorrentClient
         messageReactions.put((byte)8, new CancelReaction(reader.getMustReadQueue()));
         messageManager = new MessageManager(messageReactions);
     }
-    public void createTorrent(String pathToFile) {}
 
     public void execute()
     {
@@ -65,7 +64,7 @@ public class TorrentClient
             String pathToTorrent = ourPeerBehaviour.getPathToTorrent();
             try(DataInputStream torrentFile = new DataInputStream(new FileInputStream(pathToTorrent)))
             {
-                torrentInfo = Bencoder.parse(torrentFile);
+                torrentInfo = Bencoder.parseTorrent(torrentFile);
             }
             catch (IOException e)
             {
@@ -112,8 +111,12 @@ public class TorrentClient
             }
         }
     }
-    
-    
+
+    public void createTorrent(String pathToFile)
+    {
+        Bencoder.generateTorrent(pathToFile);
+    }
+
     public void start(TorrentInfo torrentInfo, String pathToFile)
     {
         writer.initiate(torrentInfo.getFilename(),

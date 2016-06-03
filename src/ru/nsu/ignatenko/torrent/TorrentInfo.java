@@ -4,41 +4,43 @@ public class TorrentInfo
 {
     String filename;
     String path_;
-    int fileLength;
+    long fileLength;
     int pieceLength;
-    byte[] infoHash;
+    byte[][] pieceHash;
 
-    public byte[] getInfoHash()
+    public byte[] getPieceHash(int pieceIdx)
     {
-        return infoHash;
+        return pieceHash[pieceIdx];
     }
 
     public String getFilename(){return filename;}
     public String getPath(){return path_;}
-    public int getFileLength(){return  fileLength;}
+    public long getFileLength(){return  fileLength;}
     public int getPieceLength(){return  pieceLength;}
     public int getPiecesCount()
     {
         int piecesCount;
         if(fileLength%pieceLength == 0)
         {
-            piecesCount = fileLength/pieceLength;
+            piecesCount = (int)fileLength/pieceLength;
         }
         else
         {
-            piecesCount = fileLength/pieceLength +1;
+            piecesCount = (int)fileLength/pieceLength +1;
         }
         return  piecesCount;
     }
 
-    public void setInfoHash(byte[] infoHash)
+    public byte[] getHandshakeHash(){return new byte[20];}
+
+    public void setPiecesHash(byte[][] infoHash)
     {
-        this.infoHash = infoHash;
+        this.pieceHash = infoHash;
     }
 
     public void setPath(String path){path_ = path;}
 
-    public void setFileLength(int fileLength)
+    public void setFileLength(long fileLength)
     {
         this.fileLength = fileLength;
     }

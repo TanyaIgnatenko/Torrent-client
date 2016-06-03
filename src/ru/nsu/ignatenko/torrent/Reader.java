@@ -7,14 +7,13 @@ import java.io.*;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Reader implements Runnable
 {
     private static Logger logger = LogManager.getLogger("default_logger");
     private RandomAccessFile file;
-    private int fileLength;
+    private long fileLength;
     private int pieceLength;
     private int piecesCount;
     private int lastPieceLength;
@@ -29,7 +28,7 @@ public class Reader implements Runnable
     {
     }
 
-    public void initiate(String filename, String path, int fileLength, int pieceLength, int piecesCount)
+    public void initiate(String filename, String path, long fileLength, int pieceLength, int piecesCount)
     {
         this.fileLength = fileLength;
         this.pieceLength = pieceLength;
@@ -37,7 +36,7 @@ public class Reader implements Runnable
         piece = new byte[pieceLength];
         if(fileLength % pieceLength != 0)
         {
-            lastPieceLength = fileLength % pieceLength;
+            lastPieceLength = (int)fileLength % pieceLength;
         }
         else
         {

@@ -3,10 +3,8 @@ package ru.nsu.ignatenko.torrent;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ru.nsu.ignatenko.torrent.message.Message;
 
 import java.io.EOFException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -92,7 +90,7 @@ public class ConnectionManager implements Runnable
 		{
 			logger.info("Try connect to some peer");
 			SocketChannel client = SocketChannel.open(new InetSocketAddress(peer.getIp(), peer.getPort()));
-            messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getInfoHash());
+            messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getHandshakeHash());
             logger.info("Sending handshake...");
             int bytesWrote = messageManager.sendHandshake(client);
             logger.info("Handshake sent " + bytesWrote + " bytes.");
@@ -135,7 +133,7 @@ public class ConnectionManager implements Runnable
 				SocketChannel client = serverSocket.accept();
 				logger.info("Some peer want to connect to me");
 				logger.info("Receiving handshake...");
-				messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getInfoHash());
+				messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getHandshakeHash());
 				Handshake clientHandshake = messageManager.receiveHandshake(client);
 				if(!messageManager.isValidHandshake(clientHandshake))
 				{

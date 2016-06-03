@@ -12,7 +12,7 @@ public class Writer implements Runnable
 {
     private static Logger logger = LogManager.getLogger("default_logger");
     RandomAccessFile file;
-    int fileLength;
+    long fileLength;
     int pieceLength;
     int piecesCount;
     byte piece[][];
@@ -25,7 +25,7 @@ public class Writer implements Runnable
     {
     }
 
-    public void initiate(String filename, String path, int fileLength, int pieceLength, int piecesCount)
+    public void initiate(String filename, String path, long fileLength, int pieceLength, int piecesCount)
     {
         this.fileLength = fileLength;
         this.pieceLength = pieceLength;
