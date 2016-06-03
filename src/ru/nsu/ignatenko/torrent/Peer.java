@@ -15,6 +15,7 @@ public class Peer
     private boolean isInteresting;
     private boolean chokedMe;
     private int numDoneRequests;
+    private int numDoneRequestsForTime;
     private boolean isLeecher;
     private boolean isSeeder;
 
@@ -108,9 +109,14 @@ public class Peer
         return bitfield;
     }
 
-    public synchronized void increaseNumDoneRequests(){++numDoneRequests;}
+    public synchronized void increaseNumDoneRequests(){++numDoneRequests; ++numDoneRequestsForTime;}
 
-    public synchronized void decreaseNumDoneRequests(){--numDoneRequests;}
+    public synchronized void decreaseNumDoneRequests(){--numDoneRequestsForTime;}
+
+    public int getNumDoneRequestsForTime()
+    {
+        return numDoneRequestsForTime;
+    }
 
     public int getNumDoneRequests()
     {

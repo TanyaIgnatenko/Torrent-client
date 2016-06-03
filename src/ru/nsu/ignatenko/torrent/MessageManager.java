@@ -14,7 +14,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Collection;
 import java.util.HashMap;
 
 public class MessageManager
@@ -242,8 +241,7 @@ public class MessageManager
         }
         catch (IOException e)
         {
-            socket.close();
-            return;
+            throw new EOFException();
         }
         if (count == -1)
         {
