@@ -3,7 +3,6 @@ package ru.nsu.ignatenko.torrent.message;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.nsu.ignatenko.torrent.Peer;
-import ru.nsu.ignatenko.torrent.message.Message;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

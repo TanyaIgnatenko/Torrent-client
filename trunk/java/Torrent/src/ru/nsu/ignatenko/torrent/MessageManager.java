@@ -20,6 +20,9 @@ public class MessageManager
 {
     private static Logger logger = LogManager.getLogger("default_logger");
     private final static int MAX_SIZE = 20;
+    private final static int LENGTH_SIZE = 4;
+    private final static int ID_SIZE = 1;
+    private final static int PIECE_IDX_SIZE = 4;
     private final static int PROTOCOL_NAME_LENGTH = 19;
     private final static int HASH_LENGTH = 20;
     private final static int PEER_ID_LENGTH = 20;
@@ -158,8 +161,8 @@ public class MessageManager
 
     public ByteBuffer generateCancel()
     {
-        ByteBuffer message = ByteBuffer.allocate(4 + 1);
-        int length = 13;
+        int length = ID_SIZE;
+        ByteBuffer message = ByteBuffer.allocate(LENGTH_SIZE + length);
         byte id = 8;
         message.putInt(length);
         message.put(id);
@@ -171,8 +174,8 @@ public class MessageManager
 
     public ByteBuffer generateHave(int pieceIdx)
     {
-        ByteBuffer message = ByteBuffer.allocate(4 + 4 + 1);
-        int length = 5;
+        int length = ID_SIZE + PIECE_IDX_SIZE;
+        ByteBuffer message = ByteBuffer.allocate(LENGTH_SIZE + length);
         byte id = 4;
         message.putInt(length);
         message.put(id);
@@ -184,8 +187,8 @@ public class MessageManager
 
     public ByteBuffer generateRequest(int pieceIdx)
     {
-        ByteBuffer message = ByteBuffer.allocate(4 + 4 + 1);
-        int length = 5;
+        int length = ID_SIZE + PIECE_IDX_SIZE;
+        ByteBuffer message = ByteBuffer.allocate(LENGTH_SIZE + length);
         byte id = 6;
         message.putInt(length);
         message.put(id);
@@ -198,8 +201,8 @@ public class MessageManager
     public ByteBuffer generatePiece(byte[] piece, int pieceIdx)
     {
 //        logger.info("In generatePiece length of piece: " + piece.length+ "\n piece: "+new String(piece));
-        int length = piece.length + 4 + 1;
-        ByteBuffer message = ByteBuffer.allocate(length + 4);
+        int length = piece.length + ID_SIZE + PIECE_IDX_SIZE;
+        ByteBuffer message = ByteBuffer.allocate(LENGTH_SIZE + length);
         byte id = 7;
         message.putInt(length);
         message.put(id);
@@ -219,8 +222,8 @@ public class MessageManager
         {
             payload[i] = (byte)0;
         }
-        int length = payload.length+1;
-        ByteBuffer message = ByteBuffer.allocate(length + 4);
+        int length = payload.length + ID_SIZE;
+        ByteBuffer message = ByteBuffer.allocate(length + LENGTH_SIZE);
         byte id = 5;
         message.putInt(length);
         message.put(id);
@@ -232,7 +235,7 @@ public class MessageManager
 
     public void receiveMessage(SocketChannel socket, Peer peer) throws IOException
     {
-        ByteBuffer data1 = ByteBuffer.allocate(4);
+        ByteBuffer data1 = ByteBuffer.allocate(LENGTH_SIZE);
 
         int count = 0;
         try
@@ -249,22 +252,18 @@ public class MessageManager
         }
         logger.info("Received some message");
         data1.rewind();
-        if (count != 4)
+        if (count != LENGTH_SIZE)
         {
             throw new InvalidFormatException();
         }
         int length = data1.getInt();
-        ByteBuffer data2 = ByteBuffer.allocate(1);
+        ByteBuffer data2 = ByteBuffer.allocate(ID_SIZE);
         socket.read(data2);
         data2.rewind();
         byte id = data2.get();
         logger.info("With id " + id);
         Message message = messageFactory.create(id, length-1, peer);
         message.parse(socket);
-        if (messageReactions == null)
-        {
-            System.out.println("mesReact == null");
-        }
         messageReactions.get(id).react(message);
     }
 }

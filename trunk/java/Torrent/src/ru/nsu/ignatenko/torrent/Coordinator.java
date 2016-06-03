@@ -2,15 +2,11 @@ package ru.nsu.ignatenko.torrent;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ru.nsu.ignatenko.torrent.message.Bitfield;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.BitSet;
-import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class Coordinator implements Runnable
 {
