@@ -56,7 +56,16 @@ public class TorrentClient
         if (ourPeerBehaviour.isCreator())
         {
             String pathToFile = ourPeerBehaviour.getPathToFile();
-            createTorrent(pathToFile);
+            String pathToTorrent = ourPeerBehaviour.getPathToTorrent();
+            try
+            {
+                createTorrent(pathToFile, pathToTorrent);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                return;
+            }
         }
         else
         {
@@ -68,7 +77,8 @@ public class TorrentClient
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+               e.printStackTrace();
+               return;
             }
             if (ourPeerBehaviour.isSeeder())
             {
@@ -112,9 +122,9 @@ public class TorrentClient
         }
     }
 
-    public void createTorrent(String pathToFile)
+    public void createTorrent(String pathToFile, String pathToTorrent) throws IOException
     {
-        Bencoder.generateTorrent(pathToFile);
+        Bencoder.generateTorrent(pathToFile, pathToTorrent);
     }
 
     public void start(TorrentInfo torrentInfo, String pathToFile)

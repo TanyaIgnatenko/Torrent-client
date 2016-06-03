@@ -21,13 +21,14 @@ class InteractorWithUser
     public PeerBehaviour getInfoAboutOurPeer()
     {
         System.out.println("Input format:\n" +
-                "To create torrent from file use: -c [path to file]\n" +
+                "To create torrent from file use: -c [path to Torrent] [path to file]\n" +
                 "To distribute file from torrent use: -s [path to Torrent] [path to File]\n" +
                 "To download file from torrent use: -l [path to Torrent] [path to directory for download]");
 
         Scanner scanner = new Scanner(System.in);
         String input = scanner.next();
         PeerBehaviour ourPeerBehaviour = new PeerBehaviour();
+        ourPeerBehaviour.setPathToTorrent(scanner.next());
         if (input.equals("-c"))
         {
             ourPeerBehaviour.setCreator(true);
@@ -36,13 +37,11 @@ class InteractorWithUser
         else if (input.equals("-s"))
         {
             ourPeerBehaviour.setSeeder(true);
-            ourPeerBehaviour.setPathToTorrent(scanner.next());
             ourPeerBehaviour.setPathToFile(scanner.next());
         }
         else if (input.equals("-l"))
         {
             ourPeerBehaviour.setLeecher(true);
-            ourPeerBehaviour.setPathToTorrent(scanner.next());
             ourPeerBehaviour.setPathToDownloadDir(scanner.next());
         }
         else
