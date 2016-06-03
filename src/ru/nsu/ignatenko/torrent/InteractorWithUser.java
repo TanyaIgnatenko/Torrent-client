@@ -21,9 +21,9 @@ class InteractorWithUser
     public PeerBehaviour getInfoAboutOurPeer()
     {
         System.out.println("Input format:\n" +
-                "To create torrent from file/s use: -c [path to file]\n" +
+                "To create torrent from file use: -c [path to file]\n" +
                 "To distribute file from torrent use: -s [path to Torrent] [path to File]\n" +
-                "To download file/s from torrent use: -l [path to Torrent] [path to directory for download]");
+                "To download file from torrent use: -l [path to Torrent] [path to directory for download]");
 
         Scanner scanner = new Scanner(System.in);
         String input = scanner.next();

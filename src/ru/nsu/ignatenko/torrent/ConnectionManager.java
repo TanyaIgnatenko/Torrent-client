@@ -121,7 +121,7 @@ public class ConnectionManager implements Runnable
 		}
 		catch(IOException e)
 		{
-			e.printStackTrace();
+			System.out.println("Can't connect to peer with ip " +  peer.getIp() + " and port " + peer.getPort());
 		}
 	}
 
@@ -205,6 +205,7 @@ public class ConnectionManager implements Runnable
 									connectedPeers.notify();
 								}
 								key.channel().close();
+								key.cancel();
 							}
 						}
 						else
