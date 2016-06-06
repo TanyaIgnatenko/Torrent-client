@@ -60,9 +60,8 @@ public class Bencoder
         return (isNegative ? -number : number);
     }
 
-    public static TorrentInfo parseTorrent(DataInputStream torrentFile) throws IOException
+    public static TorrentInfo parseTorrent(DataInputStream torrentFile, TorrentInfo torrentInfo) throws IOException
     {
-        TorrentInfo torrentInfo = new TorrentInfo();
         try
         {
             torrentFile.skipBytes(13);

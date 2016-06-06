@@ -23,7 +23,7 @@ public class RequestReaction extends Reaction
     {
         Request message_ = (Request) message;
         int pieceIdx = message_.getPieceIdx();
-        Pair<Integer, SocketChannel> pair = new Pair<>(pieceIdx, message.getPeer().getSocket());
+        Pair<Integer, SocketChannel> pair = new Pair<>(pieceIdx, message.getPeer().getChannel());
         try
         {
             mustReadQueue.put(pair);

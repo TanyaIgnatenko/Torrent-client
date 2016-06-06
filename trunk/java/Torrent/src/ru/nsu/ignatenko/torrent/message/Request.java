@@ -2,11 +2,12 @@ package ru.nsu.ignatenko.torrent.message;
 
 import ru.nsu.ignatenko.torrent.Peer;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class Request  extends Message
+public class Request extends Message
 {
     private int length;
     private int pieceIdx;
@@ -17,19 +18,20 @@ public class Request  extends Message
         this.peer = peer;
     }
 
-    public void parse(SocketChannel socket)
+    public void parse(SocketChannel channel) throws IOException
     {
+        int count = 0;
         ByteBuffer idx = ByteBuffer.allocate(4);
-        try
+        while (idx.hasRemaining())
         {
-            socket.read(idx);
-            idx.rewind();
-            pieceIdx = idx.getInt();
+            count += channel.read(idx);
         }
-        catch(IOException e)
+        if (count == -1 || count != length)
         {
-            e.printStackTrace();
+            throw new EOFException();
         }
+        idx.rewind();
+        pieceIdx = idx.getInt();
     }
 
     public int getPieceIdx()

@@ -4,11 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.nsu.ignatenko.torrent.Peer;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class Bitfield  extends Message
+public class Bitfield extends Message
 {
     private static Logger logger = LogManager.getLogger("default_logger");
     byte[] bitfield;
@@ -20,19 +21,21 @@ public class Bitfield  extends Message
         this.peer = peer;
     }
 
-    public void parse(SocketChannel socket)
+    public void parse(SocketChannel channel) throws IOException
     {
-       ByteBuffer data = ByteBuffer.allocate(length);
-       try
-       {
-           socket.read(data);
-       }
-       catch(IOException e)
-       {
-           e.printStackTrace();
-       }
-       data.rewind();
-       data.get(bitfield);
+        int count = 0;
+        ByteBuffer data = ByteBuffer.allocate(length);
+        while (data.hasRemaining())
+        {
+            count += channel.read(data);
+        }
+        if (count == -1 || count != length)
+        {
+            throw new EOFException();
+        }
+
+        data.rewind();
+        data.get(bitfield);
     }
 
     @Override

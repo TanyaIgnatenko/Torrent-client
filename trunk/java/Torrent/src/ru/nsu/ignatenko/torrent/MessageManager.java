@@ -1,6 +1,5 @@
 package ru.nsu.ignatenko.torrent;
 
-import com.sun.media.sound.InvalidFormatException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.nsu.ignatenko.torrent.message.Message;
@@ -19,13 +18,13 @@ import java.util.HashMap;
 public class MessageManager
 {
     private static Logger logger = LogManager.getLogger("default_logger");
-    private final static int MAX_SIZE = 20;
     private final static int LENGTH_SIZE = 4;
     private final static int ID_SIZE = 1;
     private final static int PIECE_IDX_SIZE = 4;
     private final static int PROTOCOL_NAME_LENGTH = 19;
     private final static int HASH_LENGTH = 20;
     private final static int PEER_ID_LENGTH = 20;
+    private final static int NUM_BITS_IN_BYTE = 8;
     private final static int NUM_RESERVED_BYTES = 8;
     private final static int HANDSHAKE_SIZE = 68;
     private Handshake handshake = new Handshake();
@@ -63,8 +62,6 @@ public class MessageManager
 
     public Handshake receiveHandshake(SocketChannel socket) throws IOException
     {
-        int bytesRead;
-        int totalBytesRead = 0;
         int protocolNameLength;
         ByteBuffer protocolNameBuf;
         ByteBuffer lengthBuf = ByteBuffer.allocate(1);
@@ -72,48 +69,40 @@ public class MessageManager
         ByteBuffer hashBuf = ByteBuffer.allocate(HASH_LENGTH);
         ByteBuffer peerIdBuf = ByteBuffer.allocate(PEER_ID_LENGTH);
 
-        if ((bytesRead = socket.read(lengthBuf)) != 1)
+        if ((socket.read(lengthBuf)) != 1)
         {
-            throw new InvalidFormatException("Unexpected EOF.");
+            throw new IOException("Unexpected EOF.");
         }
-        totalBytesRead += bytesRead;
-//        logger.info("Receiving handshake: length read: {} bytes.", bytesRead);
 
         lengthBuf.rewind();
         protocolNameLength = lengthBuf.get();
 
         if (protocolNameLength != PROTOCOL_NAME_LENGTH)
         {
-            throw new InvalidFormatException("Invalid clientHandshake.");
+            throw new IOException("Invalid clientHandshake.");
         }
         protocolNameBuf = ByteBuffer.allocate(protocolNameLength);
 
-        if ((bytesRead = socket.read(protocolNameBuf)) != protocolNameLength)
+        if (socket.read(protocolNameBuf) != protocolNameLength)
         {
-            throw new InvalidFormatException("Invalid clientHandshake.");
+            throw new IOException("Invalid clientHandshake.");
         }
-//        logger.info("Receiving handshake: protocol name read: {} bytes.", bytesRead);
-        totalBytesRead += bytesRead;
-        if ((bytesRead = socket.read(reservedBytesBuf)) != NUM_RESERVED_BYTES)
-        {
-            throw new InvalidFormatException("Invalid clientHandshake.");
-        }
-//        logger.info("Receiving handshake: reserved bytes read: {} bytes.", bytesRead);
-        totalBytesRead += bytesRead;
-        if ((bytesRead = socket.read(hashBuf)) != HASH_LENGTH)
-        {
-            throw new InvalidFormatException("Invalid clientHandshake.");
-        }
-//        logger.info("Receiving handshake: hash read: {} bytes.", bytesRead);
-        totalBytesRead += bytesRead;
-        if ((bytesRead = socket.read(peerIdBuf)) != PEER_ID_LENGTH)
-        {
-            throw new InvalidFormatException("Invalid clientHandshake.");
-        }
-//        logger.info("Receiving handshake: peerID read: {} bytes.", bytesRead);
-        totalBytesRead += bytesRead;
 
-        logger.info("Successfully received {} bytes of handshake.", totalBytesRead);
+        if (socket.read(reservedBytesBuf) != NUM_RESERVED_BYTES)
+        {
+            throw new IOException("Invalid clientHandshake.");
+        }
+
+        if (socket.read(hashBuf) != HASH_LENGTH)
+        {
+            throw new IOException("Invalid clientHandshake.");
+        }
+
+        if (socket.read(peerIdBuf) != PEER_ID_LENGTH)
+        {
+            throw new IOException("Invalid clientHandshake.");
+        }
+
         protocolNameBuf.rewind();
         hashBuf.rewind();
         peerIdBuf.rewind();
@@ -138,24 +127,33 @@ public class MessageManager
         {
             return isValidHandshake(clientHandshake);
         }
-        logger.info("Expected peerID: {} actual clien't peerID: {}", expectedPeerID, clientHandshake.getPeerID());
         return false;
     }
 
-    public void sendMessage(SocketChannel socket, ByteBuffer message)
+    public void sendMessage(SocketChannel channel, ByteBuffer message)
     {
         try
         {
-            int bytesWrote;
+            int bytesWrote = -1;
             logger.info("In sendMessage size of message : " + message.remaining());
-            while ((bytesWrote = socket.write(message)) == 0);
+            while (message.hasRemaining())
+            {
+                bytesWrote = channel.write(message);
+            }
             byte id = message.get(4);
             logger.info("Sended message {} into socket in size {} bytes.", id, bytesWrote);
         }
         catch (IOException e)
         {
-            e.printStackTrace();
-            throw new RuntimeException();
+            logger.info("Error: Can't send message. Channel will be closed.");
+            try
+            {
+                channel.close();
+            }
+            catch (IOException e1)
+            {
+               logger.info("Error: Can't close channel.");
+            }
         }
     }
 
@@ -200,7 +198,7 @@ public class MessageManager
 
     public ByteBuffer generatePiece(byte[] piece, int pieceIdx)
     {
-//        logger.info("In generatePiece length of piece: " + piece.length+ "\n piece: "+new String(piece));
+        logger.info("In generatePiece length of piece: " + piece.length);
         int length = piece.length + ID_SIZE + PIECE_IDX_SIZE;
         ByteBuffer message = ByteBuffer.allocate(LENGTH_SIZE + length);
         byte id = 7;
@@ -215,10 +213,11 @@ public class MessageManager
 
     public ByteBuffer generateBitfield(BitSet bitfield, int pieceCount)
     {
+        int n = pieceCount/NUM_BITS_IN_BYTE + Integer.signum(pieceCount%NUM_BITS_IN_BYTE);
         byte[] bitset = bitfield.toByteArray();
-        byte[] payload = new byte[pieceCount/8 + 1];
+        byte[] payload = new byte[n];
         System.arraycopy(bitset, 0, payload, 0, bitset.length);
-        for(int i = bitfield.length(); i < pieceCount/8 + 1; ++i)
+        for(int i = bitfield.length(); i < n; ++i)
         {
             payload[i] = (byte)0;
         }
@@ -237,28 +236,22 @@ public class MessageManager
     {
         ByteBuffer data1 = ByteBuffer.allocate(LENGTH_SIZE);
 
-        int count = 0;
-        try
-        {
-            count = socket.read(data1);
-        }
-        catch (IOException e)
+        int count = socket.read(data1);
+        if (count == -1 || count != LENGTH_SIZE)
         {
             throw new EOFException();
         }
-        if (count == -1)
-        {
-            throw new EOFException();
-        }
+
         logger.info("Received some message");
         data1.rewind();
-        if (count != LENGTH_SIZE)
-        {
-            throw new InvalidFormatException();
-        }
         int length = data1.getInt();
         ByteBuffer data2 = ByteBuffer.allocate(ID_SIZE);
-        socket.read(data2);
+        count = socket.read(data2);
+        if (count == -1 || count != 1)
+        {
+            throw new EOFException();
+        }
+
         data2.rewind();
         byte id = data2.get();
         logger.info("With id " + id);

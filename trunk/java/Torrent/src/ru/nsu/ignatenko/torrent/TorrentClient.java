@@ -10,10 +10,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.nsu.ignatenko.torrent.exceptions.PortNotFoundException;
+import ru.nsu.ignatenko.torrent.exceptions.SelectorException;
 import ru.nsu.ignatenko.torrent.message.reaction.*;
 
 public class TorrentClient
 {
+    private static Logger logger = LogManager.getLogger("default_logger");
     private final static int  MAX_NUM_PEERS = 10;
     private ConnectionManager connectionManager;
     private MessageManager messageManager;
@@ -22,14 +25,18 @@ public class TorrentClient
     private Writer writer;
     private InteractorWithUser userInteractor;
     private BlockingQueue<Peer> connectedPeers;
+    private BlockingQueue<Peer> newConnectedPeers;
     private BlockingQueue<Peer> peers;
+    private TorrentInfo torrentInfo;
     private Peer ourPeer;
-    private  boolean stop;
-    private static Logger logger = LogManager.getLogger("default_logger");
-    
+    private  Boolean problemStop = new Boolean(false);
+    private  Boolean stop = new Boolean(false);
+
     public TorrentClient()
     {
         connectedPeers = new LinkedBlockingQueue<>();
+        newConnectedPeers = new LinkedBlockingQueue<>();
+        torrentInfo = new TorrentInfo();
         peers = new LinkedBlockingQueue<>();
         reader = new Reader();
         writer = new Writer();
@@ -42,12 +49,12 @@ public class TorrentClient
         messageReactions.put((byte)4, new HaveReaction());
         messageReactions.put((byte)5, new BitfieldReaction());
         messageReactions.put((byte)6, new RequestReaction(reader.getMustReadQueue()));
-        messageReactions.put((byte)7, new PieceReaction(writer.getMustWriteQueue()));
+        messageReactions.put((byte)7, new PieceReaction(writer.getMustWriteQueue(), torrentInfo));
         messageReactions.put((byte)8, new CancelReaction(reader.getMustReadQueue()));
         messageManager = new MessageManager(messageReactions);
     }
 
-    public void execute()
+    public void execute() throws PortNotFoundException, SelectorException, IOException
     {
         userInteractor = new InteractorWithUser(this, peers);
         PeerBehaviour ourPeerBehaviour = userInteractor.getInfoAboutOurPeer();
@@ -63,22 +70,21 @@ public class TorrentClient
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                System.out.println("Can't create torrent file");
                 return;
             }
         }
         else
         {
-            TorrentInfo torrentInfo = null;
             String pathToTorrent = ourPeerBehaviour.getPathToTorrent();
             try(DataInputStream torrentFile = new DataInputStream(new FileInputStream(pathToTorrent)))
             {
-                torrentInfo = Bencoder.parseTorrent(torrentFile);
+                Bencoder.parseTorrent(torrentFile, torrentInfo);
             }
             catch (IOException e)
             {
-               e.printStackTrace();
-               return;
+                System.out.println("Can't parse torrent file");
+                return;
             }
             if (ourPeerBehaviour.isSeeder())
             {
@@ -95,27 +101,32 @@ public class TorrentClient
             else if(ourPeerBehaviour.isLeecher())
             {
                 ourPeer.setLeecher(true);
-                String pathToFile = ourPeerBehaviour.getPathToDownloadDir() + torrentInfo.getFilename() ;
+                String pathToFile = ourPeerBehaviour.getPathToFile() ;
                 BitSet bitfield = new BitSet(torrentInfo.getPiecesCount());
                 ourPeer.setBitfield(bitfield);
                 start(torrentInfo, pathToFile);
-                userInteractor.run();
+
+                Thread thread = new Thread(userInteractor);
+                thread.start();
+
                 while(!stop)
                 {
                     try
                     {
+                        Peer peerToConnect = peers.take();
+                        connectionManager.connectTo(peerToConnect);
+
                         synchronized (connectedPeers)
                         {
                             while (connectedPeers.size() == MAX_NUM_PEERS)
                             {
                                 connectedPeers.wait();
                             }
-                            connectionManager.connectTo(peers.take());
                         }
                     }
                     catch (InterruptedException e)
                     {
-                        e.printStackTrace();
+                       logger.info("It never happens");
                     }
                 }
             }
@@ -127,29 +138,39 @@ public class TorrentClient
         Bencoder.generateTorrent(pathToFile, pathToTorrent);
     }
 
-    public void start(TorrentInfo torrentInfo, String pathToFile)
+    public void start(TorrentInfo torrentInfo,
+                           String pathToFile) throws PortNotFoundException, SelectorException, IOException
     {
-        writer.initiate(torrentInfo.getFilename(),
-                pathToFile,
-                torrentInfo.getFileLength(),
-                torrentInfo.getPieceLength(),
-                torrentInfo.getPiecesCount());
 
+        if(ourPeer.isLeecher())
+        {
+            writer.initiate(torrentInfo.getFilename(),
+                    pathToFile,
+                    torrentInfo.getFileLength(),
+                    torrentInfo.getPieceLength(),
+                    torrentInfo.getPiecesCount());
+        }
         reader.initiate(torrentInfo.getFilename(),
                 pathToFile,
                 torrentInfo.getFileLength(),
                 torrentInfo.getPieceLength(),
                 torrentInfo.getPiecesCount());
-
         coordinator = new Coordinator(connectedPeers,
+                newConnectedPeers,
                 messageManager,
                 writer.getReadyWriteQueue(),
                 reader.getReadyReadQueue(),
                 ourPeer, writer, torrentInfo, this, userInteractor);
 
-        connectionManager = new ConnectionManager(messageManager, connectedPeers, ourPeer, torrentInfo);
-        connectionManager.processIncomingConnections();
-        connectionManager.selectChannelsWithIncomingMessages();
+        connectionManager = new ConnectionManager(messageManager,
+                                                  connectedPeers,
+                                                  newConnectedPeers,
+                                                  ourPeer,
+                                                  torrentInfo,
+                                                  problemStop,
+                                                  stop);
+        
+        connectionManager.processIncomingConnectionsAndMessages();
         coordinator.start();
         reader.start();
         writer.start();
@@ -161,11 +182,11 @@ public class TorrentClient
         {
             try
             {
-                peer.getSocket().close();
+                peer.getChannel().close();
             }
             catch (IOException e)
             {
-                e.printStackTrace();
+                logger.info("Can't close channel");
             }
         }
     }
@@ -178,6 +199,13 @@ public class TorrentClient
     public static void main(String[] args)
     {
         TorrentClient client = new TorrentClient();
-        client.execute();
+        try
+        {
+            client.execute();
+        }
+        catch (PortNotFoundException | SelectorException | IOException e)
+        {
+            System.out.println("Some problem happened. For more information look in a log file. Torrent client is terminated.");
+        }
     }
 }

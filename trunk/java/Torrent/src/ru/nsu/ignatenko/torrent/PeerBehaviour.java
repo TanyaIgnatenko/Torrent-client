@@ -7,7 +7,6 @@ public class PeerBehaviour
     private boolean isCreator;
     private String pathToFile;
     private String pathToTorrent;
-    private String pathToDownloadDir;
 
     public void setLeecher(boolean leecher)
     {
@@ -34,11 +33,6 @@ public class PeerBehaviour
         this.pathToTorrent = pathToTorrent;
     }
 
-    public void setPathToDownloadDir(String pathToDownloadDir)
-    {
-        this.pathToDownloadDir = pathToDownloadDir;
-    }
-
     public boolean isLeecher()
     {
         return isLeecher;
@@ -62,10 +56,5 @@ public class PeerBehaviour
     public String getPathToFile()
     {
         return pathToFile;
-    }
-
-    public String getPathToDownloadDir()
-    {
-        return pathToDownloadDir;
     }
 }

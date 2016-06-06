@@ -24,19 +24,17 @@ public class Reader implements Runnable
     private BlockingQueue<Trio<Integer, byte[], SocketChannel>> readyQueue = new LinkedBlockingQueue<>();
     private BlockingQueue<Pair<Integer, SocketChannel>> mustReadQueue = new LinkedBlockingQueue<>();
 
-    public Reader()
-    {
-    }
 
-    public void initiate(String filename, String path, long fileLength, int pieceLength, int piecesCount)
+    public void initiate(String filename, String path, long fileLength,
+                         int pieceLength, int piecesCount) throws FileNotFoundException
     {
         this.fileLength = fileLength;
         this.pieceLength = pieceLength;
         this.piecesCount = piecesCount;
         piece = new byte[pieceLength];
-        if(fileLength % pieceLength != 0)
+        if (fileLength % pieceLength != 0)
         {
-            lastPieceLength = (int)fileLength % pieceLength;
+            lastPieceLength = (int) fileLength % pieceLength;
         }
         else
         {
@@ -48,10 +46,10 @@ public class Reader implements Runnable
             File tmp = new File(path);
             file = new RandomAccessFile(tmp, "r");
         }
-        catch(FileNotFoundException e)
+        catch (FileNotFoundException e)
         {
-            e.printStackTrace();
-            logger.info("Error: source file is missing.");
+            logger.info("Error: Seeder's reader can't find file.");
+            throw e;
         }
     }
 
@@ -71,7 +69,7 @@ public class Reader implements Runnable
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            logger.info("Error: Can't close file.");
         }
     }
 
@@ -87,7 +85,7 @@ public class Reader implements Runnable
             }
             catch (InterruptedException e)
             {
-                e.printStackTrace();
+                logger.info("It never happens");
             }
             read(data);
         }
@@ -109,9 +107,9 @@ public class Reader implements Runnable
                 {
                     readyQueue.put(new Trio<>(idx, Arrays.copyOf(piece, piece.length), socket));
                 }
-                catch(Exception e)
+                catch (InterruptedException e)
                 {
-                    e.printStackTrace();
+                    logger.info("It never happens");
                 }
             }
             else
@@ -122,11 +120,11 @@ public class Reader implements Runnable
                 {
                     readyQueue.put(new Trio<>(idx, Arrays.copyOf(lastPiece, lastPiece.length), socket));
                 }
-                catch(Exception e)
+                catch (InterruptedException e)
                 {
-                    e.printStackTrace();
+                    logger.info("It never happens");
                 }
-                logger.info("Read a last piece");
+//                logger.info("Read a last piece");
             }
         }
         catch (IOException e)
