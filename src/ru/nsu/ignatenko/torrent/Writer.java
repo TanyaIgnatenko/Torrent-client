@@ -25,7 +25,7 @@ public class Writer implements Runnable
     {
     }
 
-    public void initiate(String filename, String path, long fileLength, int pieceLength, int piecesCount)
+    public void initiate(String filename, String path, long fileLength, int pieceLength, int piecesCount) throws IOException
     {
         this.fileLength = fileLength;
         this.pieceLength = pieceLength;
@@ -39,7 +39,8 @@ public class Writer implements Runnable
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            logger.info("Error: Leecher's writer can't open a file.");
+            throw e;
         }
     }
 
@@ -61,7 +62,7 @@ public class Writer implements Runnable
             }
             catch (InterruptedException e)
             {
-                e.printStackTrace();
+                logger.info("It never happens");
             }
             write(pieceInfo.first, pieceInfo.second);
         }
@@ -77,15 +78,14 @@ public class Writer implements Runnable
             {
                 changesQueue.put(idx);
             }
-            catch(Exception e)
+            catch(InterruptedException e)
             {
-                e.printStackTrace();
+                logger.info("It never happens");
             }
-            logger.info("Wrote a piece");
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            logger.info("Error: Can't write a piece with id {} to file." + idx);
         }
     }
 
@@ -101,7 +101,7 @@ public class Writer implements Runnable
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            logger.info("Error: Can't close file.");
         }
     }
 

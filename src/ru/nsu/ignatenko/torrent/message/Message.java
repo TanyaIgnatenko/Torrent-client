@@ -2,6 +2,7 @@ package ru.nsu.ignatenko.torrent.message;
 
 import ru.nsu.ignatenko.torrent.Peer;
 
+import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
 public abstract class Message
@@ -16,7 +17,7 @@ public abstract class Message
         return peer;
     }
     public byte[] getPayload(){return payload;}
-    public void parse(SocketChannel socket){}
+    public void parse(SocketChannel channel) throws IOException {}
     public void setLength(int length){this.length = length;}
     public int getLength(){return length;}
     public int getId()

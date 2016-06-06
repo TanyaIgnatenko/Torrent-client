@@ -7,7 +7,7 @@ import java.util.BitSet;
 public class Peer
 {
     private BitSet bitfield;
-    private SocketChannel socket;
+    private SocketChannel channel;
     private byte[] peerID;
     private InetAddress ip;
     private int port;
@@ -34,9 +34,9 @@ public class Peer
         this.peerID = peerID;
     }
 
-    public synchronized void setSocket(SocketChannel socket)
+    public synchronized void setChannel(SocketChannel channel)
     {
-        this.socket = socket;
+        this.channel = channel;
     }
 
     public synchronized void setBitfield(BitSet bitfield)
@@ -84,9 +84,9 @@ public class Peer
         return peerID;
     }
 
-    public synchronized SocketChannel getSocket()
+    public synchronized SocketChannel getChannel()
     {
-        return socket;
+        return channel;
     }
 
     public boolean isChokedMe()

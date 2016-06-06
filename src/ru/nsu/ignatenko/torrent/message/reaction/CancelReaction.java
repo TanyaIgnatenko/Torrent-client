@@ -21,6 +21,6 @@ public class CancelReaction  extends Reaction
         ByteBuffer buf = ByteBuffer.allocate(message.getLength());
         buf.put(message.getPayload());
         Integer pieceIdx = buf.getInt();
-        mustReadQueue.remove(new Pair<>(pieceIdx, message.getPeer().getSocket()));
+        mustReadQueue.remove(new Pair<>(pieceIdx, message.getPeer().getChannel()));
     }
 }

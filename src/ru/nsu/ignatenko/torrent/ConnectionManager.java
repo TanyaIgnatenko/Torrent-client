@@ -1,24 +1,22 @@
 package ru.nsu.ignatenko.torrent;
 
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.nsu.ignatenko.torrent.exceptions.PortNotFoundException;
+import ru.nsu.ignatenko.torrent.exceptions.SelectorException;
 
-import java.io.EOFException;
 import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.net.StandardSocketOptions;
+import java.nio.channels.*;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import java.util.Map;
-
-public class ConnectionManager implements Runnable
+public class ConnectionManager
 {
 	private static Logger logger = LogManager.getLogger("default_logger");
 
@@ -28,200 +26,285 @@ public class ConnectionManager implements Runnable
 
 	private ServerSocketChannel serverSocket;
 	private BlockingQueue<Peer> connectedPeers;
+	private BlockingQueue<Peer> newConnectedPeers;
 	private TorrentInfo torrentInfo;
 	private Peer ourPeer;
 
 	private Selector selector;
 	private MessageManager messageManager;
-	private boolean stop = false;
-
-
+	private  Boolean problemStop;
+	private  Boolean stop;
+	private Lock selectorRegisterLock = new ReentrantLock();
+	
 	public ConnectionManager(MessageManager messageManager, BlockingQueue<Peer> connectedPeers,
-							 Peer ourPeer, TorrentInfo torrentInfo)
+							 BlockingQueue<Peer> newConnectedPeers, Peer ourPeer, TorrentInfo torrentInfo,
+							 Boolean problemStop, Boolean stop) throws PortNotFoundException, SelectorException
 	{
-		for(int port = MIN_PORT; port <= MAX_PORT; ++port)
+		for (int port = MIN_PORT; port <= MAX_PORT; ++port)
 		{
 			try
 			{
 				serverSocket = ServerSocketChannel.open();
 				serverSocket.bind(new InetSocketAddress(port));
-                ourPeer.setPort(port);
-                String peerID = "1234567890123456" + port;
-                ourPeer.setPeerID(peerID.getBytes(Charset.forName("ASCII")));
-                System.out.println("Ready to listen port " + port);
-                System.out.println("Set peerID: " + peerID);
-                logger.info("Ready to listen port " + port);
+				ourPeer.setPort(port);
+				String peerID = "1234567890123456" + port;
+				ourPeer.setPeerID(peerID.getBytes(Charset.forName("ASCII")));
+				System.out.println("Ready to listen port " + port);
+				System.out.println("Set peerID: " + peerID);
+				logger.info("Ready to listen port " + port);
 			}
-			catch(IOException e)
+			catch (IOException e)
 			{
 				continue;
 			}
 			break;
 		}
-		if(serverSocket == null)
+		if (serverSocket == null)
 		{
-			throw new RuntimeException("No available port to listen.");
+			logger.info("No available port to listen.");
+			throw new PortNotFoundException();
 		}
 
 		this.messageManager = messageManager;
 		this.connectedPeers = connectedPeers;
+		this.newConnectedPeers = newConnectedPeers;
 		this.torrentInfo = torrentInfo;
 		this.ourPeer = ourPeer;
+		this.stop = stop;
+		this.problemStop = problemStop;
 		try
 		{
 			selector = Selector.open();
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
-			e.printStackTrace();
+			logger.info("Error: Cant't open a selector.");
+			throw new SelectorException();
 		}
-	}
-
-	public void processIncomingConnections()
-	{
-		Thread thread = new Thread(this, "Acceptor");
-        stop = false;
-		thread.start();
 	}
 
 	public void connectTo(Peer peer)
 	{
 		try
 		{
-			logger.info("Try connect to some peer");
 			SocketChannel client = SocketChannel.open(new InetSocketAddress(peer.getIp(), peer.getPort()));
-            messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getHandshakeHash());
-            logger.info("Sending handshake...");
-            int bytesWrote = messageManager.sendHandshake(client);
-            logger.info("Handshake sent " + bytesWrote + " bytes.");
-            logger.info("Receiving handshake...");
-            Handshake clientHandshake = messageManager.receiveHandshake(client);
-			if(!messageManager.isValidHandshake(clientHandshake, peer.getPeerID()))
+			messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getHandshakeHash());
+			messageManager.sendHandshake(client);
+			Handshake clientHandshake = messageManager.receiveHandshake(client);
+			if (!messageManager.isValidHandshake(clientHandshake, peer.getPeerID()))
 			{
 				logger.info("Invalid handshake. Dropping connection...");
-				client.close();
+				dropConnection(client);
 			}
 			else
 			{
 				logger.info("Got valid handshake");
-				peer.setSocket(client);
-				client.configureBlocking(false);
+				peer.setChannel(client);
 				try
 				{
+					client.setOption(StandardSocketOptions.TCP_NODELAY, true);
+					client.configureBlocking(false);
+					selectorRegisterLock.lock();
+					try
+					{
+						client.register(selector, SelectionKey.OP_READ, peer);
+					}
+					finally
+					{
+						selectorRegisterLock.unlock();
+					}
 					connectedPeers.put(peer);
+					synchronized (newConnectedPeers)
+					{
+						newConnectedPeers.put(peer);
+						newConnectedPeers.notify();
+					}
+				}
+				catch (IOException e)
+				{
+					logger.info("Error: Can't register  selector to SocketChannel. Dropping connection...");
+					dropConnection(client);
 				}
 				catch (InterruptedException e)
 				{
-					e.printStackTrace();
+					logger.info("Never happens.");
 				}
-				client.register(selector, SelectionKey.OP_READ, peer);
 			}
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
-			System.out.println("Can't connect to peer with ip " +  peer.getIp() + " and port " + peer.getPort());
+			logger.info("Error: Can't connect to peer.");
 		}
 	}
 
-	@Override
-	public void run()
+	public void proccessConnection(SelectionKey connectionKey)
 	{
-		while(!stop)
-		{
+			SocketChannel client = null;
 			try
 			{
-				SocketChannel client = serverSocket.accept();
+				ServerSocketChannel acceptor = (ServerSocketChannel) connectionKey.channel();
+				client = acceptor.accept();
 				logger.info("Some peer want to connect to me");
-				logger.info("Receiving handshake...");
+//				logger.info("Receiving handshake...");
 				messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getHandshakeHash());
 				Handshake clientHandshake = messageManager.receiveHandshake(client);
-				if(!messageManager.isValidHandshake(clientHandshake))
+				if (!messageManager.isValidHandshake(clientHandshake))
 				{
 					logger.info("Invalid handshake. Dropping connection...");
-					client.close();
-					continue;
+					dropConnection(client);
 				}
+				logger.info("Got valid handshake. Port:{}", ourPeer.getPort());
 				int bytesWrote = messageManager.sendHandshake(client);
 				logger.info("Handshake sent " + bytesWrote + " bytes.");
-				logger.info("Got valid handshake and sent my handshake to peer");
-
+//				logger.info("Got valid handshake and sent my handshake to peer");
+				System.out.println("Got valid handshake and sent my handshake to peer");
 
 				Peer peer = new Peer();
-				peer.setSocket(client);
+				peer.setChannel(client);
 				peer.setPeerID(clientHandshake.getPeerID());
-				client.configureBlocking(false);
+
 				try
 				{
+					client.setOption(StandardSocketOptions.TCP_NODELAY, true);
+					client.configureBlocking(false);
+					selectorRegisterLock.lock();
+					try
+					{
+						client.register(selector, SelectionKey.OP_READ, peer);
+					}
+					finally
+					{
+						selectorRegisterLock.unlock();
+					}
 					connectedPeers.put(peer);
+					synchronized (newConnectedPeers)
+					{
+						newConnectedPeers.put(peer);
+						newConnectedPeers.notify();
+					}
+				}
+				catch (IOException e)
+				{
+					logger.info("Error: Can't register  selector to SocketChannel. Dropping connection...");
+					dropConnection(client);
 				}
 				catch (InterruptedException e)
 				{
-					e.printStackTrace();
+					logger.info("Never happens.");
 				}
-				client.register(selector, SelectionKey.OP_READ, peer);
 			}
-			catch(IOException e)
+			catch (IOException e)
 			{
-				e.printStackTrace();
+				logger.info("Error: Can't connect to peer.");
 			}
+	}
+
+	public void dropConnection(SocketChannel channel)
+	{
+		try
+		{
+			channel.close();
+		}
+		catch (IOException e)
+		{
+			logger.info("Can't close channel");
 		}
 	}
 
-	public void selectChannelsWithIncomingMessages()
+	public void processIncomingConnectionsAndMessages()
 	{
 		Thread thread = new Thread(new Runnable()
-    {
-        @Override
-        public void run()
-        {
-			while(!stop)
+		{
+			@Override
+			public void run()
 			{
 				try
 				{
-					int numSelected = selector.select(30);
-					if(numSelected == 0)
+					serverSocket.configureBlocking(false);
+					serverSocket.register(selector, SelectionKey.OP_ACCEPT);
+				}
+				catch (IOException e)
+				{
+					problemStop = true;
+					logger.info("Error: Can't use a selector.");
+					System.out.println("Some problem happened. For more information look in a log file. Torrent client is terminated.");
+					System.exit(1);
+				}
+				while (true)
+				{
+					try
 					{
-						continue;
-					}
-					Set<SelectionKey> selectedKeys = selector.selectedKeys();
-					Iterator<SelectionKey> iterator = selectedKeys.iterator();
-					while(iterator.hasNext())
-					{
-						SelectionKey key = iterator.next();
-						if(key.isValid())
+						int numSelected = 0;
+						try
 						{
-							try
+							numSelected = selector.select(30);
+						}
+						catch(IOException e)
+						{
+							System.out.println("selector obgadilsyyy!");
+							e.printStackTrace();
+						}
+
+						if (numSelected == 0)
+						{
+							selectorRegisterLock.lock();
+							//	Gives other thread chance to register channel in selector.
+							selectorRegisterLock.unlock();
+//							Thread.yield();
+							continue;
+						}
+						Set<SelectionKey> selectedKeys = selector.selectedKeys();
+						Iterator<SelectionKey> iterator = selectedKeys.iterator();
+						while (iterator.hasNext())
+						{
+							SelectionKey key = iterator.next();
+
+							if (key.isAcceptable())
 							{
-								messageManager.receiveMessage((SocketChannel) key.channel(), (Peer) key.attachment());
+								proccessConnection(key);
 							}
-							catch (EOFException e)
+							if (key.isReadable())
 							{
-								logger.info("EOF got. No data in channel. Disconnecting...");
-								synchronized (connectedPeers)
+								try
 								{
-									connectedPeers.remove(key.attachment());
-									connectedPeers.notify();
+									messageManager.receiveMessage((SocketChannel) key.channel(), (Peer) key.attachment());
 								}
+								catch (IOException e)
+								{
+									logger.info("EOF got. No data in channel. Disconnecting...");
+									synchronized (connectedPeers)
+									{
+										connectedPeers.remove(key.attachment());
+										connectedPeers.notify();
+									}
+									key.channel().close();
+									key.cancel();
+								}
+							}
+							if(!key.isValid())
+							{
+								System.out.println("key is not valid");
+								logger.info("Key is not valid.");
 								key.channel().close();
 								key.cancel();
 							}
-						}
-						else
-						{
-							logger.info("Key is not valid.");
-							key.channel().close();
+							iterator.remove();
 						}
 					}
-					selectedKeys.clear();
+					catch (Exception e)
+					{
+						logger.info("Error: Can't process an incoming connection and message.");
+					}
 				}
-				catch(Exception e)
-				{
-					e.printStackTrace();
-					throw new RuntimeException();
-				}
-        }
-    }}, "Input listener");
+			}
+		}, "Input listener");
 
-	thread.start();
-    }
+		thread.start();
+	}
+
+	public void stop()
+	{
+		stop = true;
+		problemStop = true;
+	}
 }

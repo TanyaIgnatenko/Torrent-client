@@ -1,11 +1,13 @@
 package ru.nsu.ignatenko.torrent;
 
-import java.util.Collection;
+
+import java.util.Arrays;
 
 public class TorrentInfo
 {
+    private final static int HASH_LENGTH = 20;
+
     String filename;
-    String path_;
     long fileLength;
     int pieceLength;
     byte[] piecesHash;
@@ -13,15 +15,17 @@ public class TorrentInfo
 
     public byte[] getPieceHash(int pieceIdx)
     {
-        byte[] pieceHash = new byte[20];
-        System.arraycopy(piecesHash, pieceIdx * 20, pieceHash, 0, 20);
+        byte[] pieceHash = new byte[HASH_LENGTH];
+        System.arraycopy(piecesHash, pieceIdx * HASH_LENGTH, pieceHash, 0, HASH_LENGTH);
         return pieceHash;
     }
 
-    public String getFilename(){return filename;}
-    public String getPath(){return path_;}
-    public long getFileLength(){return  fileLength;}
-    public int getPieceLength(){return  pieceLength;}
+    public String getFilename() {return filename;}
+
+    public long getFileLength() {return  fileLength;}
+
+    public int getPieceLength() {return  pieceLength;}
+
     public int getPiecesCount()
     {
         int piecesCount;
@@ -40,10 +44,14 @@ public class TorrentInfo
 
     public void setPiecesHash(byte[] piecesHash)
     {
-        this.piecesHash = piecesHash;
+
+        this.piecesHash = Arrays.copyOf(piecesHash, piecesHash.length);
     }
 
-    public void setPath(String path){path_ = path;}
+    public void setHandshakeHash(byte[] handshakeHash)
+    {
+        this.handshakeHash = Arrays.copyOf(handshakeHash, handshakeHash.length);
+    }
 
     public void setFileLength(long fileLength)
     {
@@ -59,6 +67,4 @@ public class TorrentInfo
     {
         this.pieceLength = pieceLength;
     }
-
-    public void setHandshakeHash(byte[] hash){handshakeHash = hash;}
 }

@@ -2,6 +2,7 @@ package ru.nsu.ignatenko.torrent.message;
 
 import ru.nsu.ignatenko.torrent.Peer;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -16,16 +17,17 @@ public class Have  extends Message
         this.peer = peer;
     }
 
-    public void parse(SocketChannel socket)
+    public void parse(SocketChannel channel) throws IOException
     {
+        int count = 0;
         ByteBuffer data = ByteBuffer.allocate(length);
-        try
+        while (data.hasRemaining())
         {
-            socket.read(data);
+            count += channel.read(data);
         }
-        catch(IOException e)
+        if (count == -1 || count != length)
         {
-            e.printStackTrace();
+            throw new EOFException();
         }
         data.rewind();
         idx = data.getInt();
