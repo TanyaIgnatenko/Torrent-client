@@ -13,7 +13,7 @@ public class Peer
     private int port;
     private boolean hasOurBitfield;
     private boolean isInteresting;
-    private boolean chokedMe;
+    private boolean chokedMe = true;
     private int numDoneRequests;
     private int numDoneRequestsForTime;
     private boolean isLeecher;

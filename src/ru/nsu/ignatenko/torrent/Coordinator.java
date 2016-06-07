@@ -78,6 +78,9 @@ public class Coordinator implements Runnable
                 ByteBuffer message = messageManager.generateBitfield(ourPeer.getBitfield(), torrentInfo.getPiecesCount());
                 messageManager.sendMessage(newPeer.getChannel(), message);
                 newPeer.setHasOurBitfield();
+
+                ByteBuffer msg = messageManager.generateUnchoke();
+                messageManager.sendMessage(newPeer.getChannel(), msg);
             }
 
             if (ourPeer.isLeecher())

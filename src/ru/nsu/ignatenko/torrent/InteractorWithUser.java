@@ -61,7 +61,7 @@ class InteractorWithUser implements Runnable
     @Override
     public void run()
     {
-        System.out.println("Input format:\n" +
+        System.out.println("\nInput format:\n" +
                 "To tell about peer that has this torrent use: [peerID] [ip] [port]\n" +
                 "To stop work of torrent client use: stop");
 

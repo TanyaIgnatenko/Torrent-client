@@ -166,7 +166,18 @@ public class MessageManager
         message.put(id);
         logger.info("Generated cancel message");
         message.flip();
+        return message;
+    }
 
+    public ByteBuffer generateUnchoke()
+    {
+        int length = ID_SIZE;
+        ByteBuffer message = ByteBuffer.allocate(LENGTH_SIZE + length);
+        byte id = 1;
+        message.putInt(length);
+        message.put(id);
+        logger.info("Generated unchoke message");
+        message.flip();
         return message;
     }
 

@@ -16,28 +16,32 @@ import ru.nsu.ignatenko.torrent.message.reaction.*;
 
 public class TorrentClient
 {
-    private static Logger logger = LogManager.getLogger("default_logger");
     private final static int  MAX_NUM_PEERS = 10;
+
     private ConnectionManager connectionManager;
+    private InteractorWithUser userInteractor;
     private MessageManager messageManager;
     private Coordinator coordinator;
     private Reader reader;
     private Writer writer;
-    private InteractorWithUser userInteractor;
+
+    private Peer ourPeer;
+    private BlockingQueue<Peer> peers;
     private BlockingQueue<Peer> connectedPeers;
     private BlockingQueue<Peer> newConnectedPeers;
-    private BlockingQueue<Peer> peers;
     private TorrentInfo torrentInfo;
-    private Peer ourPeer;
     private Thread mainThread;
     private  boolean stop;
 
     public TorrentClient()
     {
+        ourPeer = new Peer();
+        mainThread = Thread.currentThread();
+        peers = new LinkedBlockingQueue<>();
         connectedPeers = new LinkedBlockingQueue<>();
         newConnectedPeers = new LinkedBlockingQueue<>();
+        userInteractor = new InteractorWithUser(this, peers);
         torrentInfo = new TorrentInfo();
-        peers = new LinkedBlockingQueue<>();
         reader = new Reader();
         writer = new Writer();
 
@@ -56,11 +60,8 @@ public class TorrentClient
 
     public void execute() throws PortNotFoundException, SelectorException, IOException
     {
-        mainThread = Thread.currentThread();
-        userInteractor = new InteractorWithUser(this, peers);
         PeerBehaviour ourPeerBehaviour = userInteractor.getInfoAboutOurPeer();
 
-        ourPeer = new Peer();
         if (ourPeerBehaviour.isCreator())
         {
             String pathToFile = ourPeerBehaviour.getPathToFile();
@@ -92,10 +93,12 @@ public class TorrentClient
                 ourPeer.setSeeder(true);
                 String pathToFile = ourPeerBehaviour.getPathToFile();
                 BitSet bitfield = new BitSet(torrentInfo.getPiecesCount());
+
                 for(int i = 0; i < torrentInfo.getPiecesCount(); ++i)
                 {
                     bitfield.set(i);
                 }
+
                 ourPeer.setBitfield(bitfield);
                 start(torrentInfo, pathToFile);
                 userInteractor.waitStopCommand();
@@ -150,16 +153,16 @@ public class TorrentClient
         }
 
         reader.initiate(pathToFile,
-                torrentInfo.getFileLength(),
-                torrentInfo.getPieceLength(),
-                torrentInfo.getPiecesCount());
+                        torrentInfo.getFileLength(),
+                        torrentInfo.getPieceLength(),
+                        torrentInfo.getPiecesCount());
 
         coordinator = new Coordinator(connectedPeers,
-                newConnectedPeers,
-                messageManager,
-                writer.getReadyWriteQueue(),
-                reader.getReadyReadQueue(),
-                ourPeer, writer, torrentInfo, this, userInteractor);
+                                      newConnectedPeers,
+                                      messageManager,
+                                      writer.getReadyWriteQueue(),
+                                      reader.getReadyReadQueue(),
+                                      ourPeer, writer, torrentInfo, this, userInteractor);
 
         connectionManager = new ConnectionManager(messageManager,
                                                   connectedPeers,
