@@ -30,15 +30,14 @@ public class ConnectionManager
 	private TorrentInfo torrentInfo;
 	private Peer ourPeer;
 
-	private Selector selector;
-	private MessageManager messageManager;
-	private  Boolean problemStop;
-	private  Boolean stop;
-	private Lock selectorRegisterLock = new ReentrantLock();
-	
+    private Lock selectorRegisterLock = new ReentrantLock();
+    private MessageManager messageManager;
+    private Selector selector;
+	private boolean stop;
+
 	public ConnectionManager(MessageManager messageManager, BlockingQueue<Peer> connectedPeers,
-							 BlockingQueue<Peer> newConnectedPeers, Peer ourPeer, TorrentInfo torrentInfo,
-							 Boolean problemStop, Boolean stop) throws PortNotFoundException, SelectorException
+							 BlockingQueue<Peer> newConnectedPeers, Peer ourPeer, TorrentInfo torrentInfo)
+							 throws PortNotFoundException, SelectorException
 	{
 		for (int port = MIN_PORT; port <= MAX_PORT; ++port)
 		{
@@ -70,8 +69,6 @@ public class ConnectionManager
 		this.newConnectedPeers = newConnectedPeers;
 		this.torrentInfo = torrentInfo;
 		this.ourPeer = ourPeer;
-		this.stop = stop;
-		this.problemStop = problemStop;
 		try
 		{
 			selector = Selector.open();
@@ -225,12 +222,11 @@ public class ConnectionManager
 				}
 				catch (IOException e)
 				{
-					problemStop = true;
 					logger.info("Error: Can't use a selector.");
 					System.out.println("Some problem happened. For more information look in a log file. Torrent client is terminated.");
 					System.exit(1);
 				}
-				while (true)
+				while (!stop)
 				{
 					try
 					{
@@ -305,6 +301,16 @@ public class ConnectionManager
 	public void stop()
 	{
 		stop = true;
-		problemStop = true;
+		for(Peer peer: connectedPeers)
+		{
+			try
+			{
+				peer.getChannel().close();
+			}
+			catch (IOException e)
+			{
+				logger.info("Can't close channel");
+			}
+		}
 	}
 }

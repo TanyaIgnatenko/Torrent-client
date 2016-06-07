@@ -29,8 +29,7 @@ public class TorrentClient
     private BlockingQueue<Peer> peers;
     private TorrentInfo torrentInfo;
     private Peer ourPeer;
-    private  Boolean problemStop = new Boolean(false);
-    private  Boolean stop = new Boolean(false);
+    private  boolean stop;
 
     public TorrentClient()
     {
@@ -166,9 +165,7 @@ public class TorrentClient
                                                   connectedPeers,
                                                   newConnectedPeers,
                                                   ourPeer,
-                                                  torrentInfo,
-                                                  problemStop,
-                                                  stop);
+                                                  torrentInfo);
         
         connectionManager.processIncomingConnectionsAndMessages();
         coordinator.start();
@@ -178,17 +175,14 @@ public class TorrentClient
 
     public void stop()
     {
-        for(Peer peer: connectedPeers)
+        connectionManager.stop();
+        coordinator.stop();
+        if(writer != null)
         {
-            try
-            {
-                peer.getChannel().close();
-            }
-            catch (IOException e)
-            {
-                logger.info("Can't close channel");
-            }
+            writer.stop();
         }
+        reader.stop();
+        stop = true;
     }
 
     public Peer getOurPeer()
