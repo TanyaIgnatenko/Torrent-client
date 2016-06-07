@@ -157,13 +157,14 @@ public class MessageManager
         }
     }
 
-    public ByteBuffer generateCancel()
+    public ByteBuffer generateCancel(int pieceIdx)
     {
-        int length = ID_SIZE;
+        int length = ID_SIZE + PIECE_IDX_SIZE;
         ByteBuffer message = ByteBuffer.allocate(LENGTH_SIZE + length);
         byte id = 8;
         message.putInt(length);
         message.put(id);
+        message.putInt(pieceIdx);
         logger.info("Generated cancel message");
         message.flip();
         return message;
@@ -177,6 +178,42 @@ public class MessageManager
         message.putInt(length);
         message.put(id);
         logger.info("Generated unchoke message");
+        message.flip();
+        return message;
+    }
+
+    public ByteBuffer generateChoke()
+    {
+        int length = ID_SIZE;
+        ByteBuffer message = ByteBuffer.allocate(LENGTH_SIZE + length);
+        byte id = 0;
+        message.putInt(length);
+        message.put(id);
+        logger.info("Generated choke message");
+        message.flip();
+        return message;
+    }
+
+    public ByteBuffer generateInterested()
+    {
+        int length = ID_SIZE;
+        ByteBuffer message = ByteBuffer.allocate(LENGTH_SIZE + length);
+        byte id = 2;
+        message.putInt(length);
+        message.put(id);
+        logger.info("Generated interested message");
+        message.flip();
+        return message;
+    }
+
+    public ByteBuffer generateUninterested()
+    {
+        int length = ID_SIZE;
+        ByteBuffer message = ByteBuffer.allocate(LENGTH_SIZE + length);
+        byte id = 3;
+        message.putInt(length);
+        message.put(id);
+        logger.info("Generated uninterested message");
         message.flip();
         return message;
     }
