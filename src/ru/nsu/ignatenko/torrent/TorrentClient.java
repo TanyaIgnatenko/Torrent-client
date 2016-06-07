@@ -29,6 +29,7 @@ public class TorrentClient
     private BlockingQueue<Peer> peers;
     private TorrentInfo torrentInfo;
     private Peer ourPeer;
+    private Thread mainThread;
     private  boolean stop;
 
     public TorrentClient()
@@ -55,6 +56,7 @@ public class TorrentClient
 
     public void execute() throws PortNotFoundException, SelectorException, IOException
     {
+        mainThread = Thread.currentThread();
         userInteractor = new InteractorWithUser(this, peers);
         PeerBehaviour ourPeerBehaviour = userInteractor.getInfoAboutOurPeer();
 
@@ -96,6 +98,7 @@ public class TorrentClient
                 }
                 ourPeer.setBitfield(bitfield);
                 start(torrentInfo, pathToFile);
+                userInteractor.waitStopCommand();
             }
             else if(ourPeerBehaviour.isLeecher())
             {
@@ -125,7 +128,7 @@ public class TorrentClient
                     }
                     catch (InterruptedException e)
                     {
-                       logger.info("It never happens");
+                       return;
                     }
                 }
             }
@@ -143,17 +146,14 @@ public class TorrentClient
 
         if(ourPeer.isLeecher())
         {
-            writer.initiate(torrentInfo.getFilename(),
-                    pathToFile,
-                    torrentInfo.getFileLength(),
-                    torrentInfo.getPieceLength(),
-                    torrentInfo.getPiecesCount());
+            writer.initiate(pathToFile, torrentInfo.getPieceLength());
         }
-        reader.initiate(torrentInfo.getFilename(),
-                pathToFile,
+
+        reader.initiate(pathToFile,
                 torrentInfo.getFileLength(),
                 torrentInfo.getPieceLength(),
                 torrentInfo.getPiecesCount());
+
         coordinator = new Coordinator(connectedPeers,
                 newConnectedPeers,
                 messageManager,
@@ -170,24 +170,23 @@ public class TorrentClient
         connectionManager.processIncomingConnectionsAndMessages();
         coordinator.start();
         reader.start();
-        writer.start();
+        if(ourPeer.isLeecher())
+        {
+            writer.start();
+        }
     }
 
     public void stop()
     {
+        stop = true;
         connectionManager.stop();
         coordinator.stop();
-        if(writer != null)
+        if(ourPeer.isLeecher())
         {
             writer.stop();
         }
         reader.stop();
-        stop = true;
-    }
-
-    public Peer getOurPeer()
-    {
-        return ourPeer;
+        mainThread.interrupt();
     }
 
     public static void main(String[] args)

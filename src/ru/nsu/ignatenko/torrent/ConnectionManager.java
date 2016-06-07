@@ -30,6 +30,7 @@ public class ConnectionManager
 	private TorrentInfo torrentInfo;
 	private Peer ourPeer;
 
+    private Thread thread;
     private Lock selectorRegisterLock = new ReentrantLock();
     private MessageManager messageManager;
     private Selector selector;
@@ -122,10 +123,7 @@ public class ConnectionManager
 					logger.info("Error: Can't register  selector to SocketChannel. Dropping connection...");
 					dropConnection(client);
 				}
-				catch (InterruptedException e)
-				{
-					logger.info("Never happens.");
-				}
+				catch (InterruptedException e){}
 			}
 		}
 		catch (IOException e)
@@ -185,10 +183,7 @@ public class ConnectionManager
 					logger.info("Error: Can't register  selector to SocketChannel. Dropping connection...");
 					dropConnection(client);
 				}
-				catch (InterruptedException e)
-				{
-					logger.info("Never happens.");
-				}
+				catch (InterruptedException e){}
 			}
 			catch (IOException e)
 			{
@@ -210,7 +205,7 @@ public class ConnectionManager
 
 	public void processIncomingConnectionsAndMessages()
 	{
-		Thread thread = new Thread(new Runnable()
+		thread = new Thread(new Runnable()
 		{
 			@Override
 			public void run()
@@ -231,15 +226,8 @@ public class ConnectionManager
 					try
 					{
 						int numSelected = 0;
-						try
-						{
-							numSelected = selector.select(30);
-						}
-						catch(IOException e)
-						{
-							System.out.println("selector obgadilsyyy!");
-							e.printStackTrace();
-						}
+
+						numSelected = selector.select(30);
 
 						if (numSelected == 0)
 						{
@@ -301,6 +289,7 @@ public class ConnectionManager
 	public void stop()
 	{
 		stop = true;
+        thread.interrupt(); // actually unnecessary
 		for(Peer peer: connectedPeers)
 		{
 			try

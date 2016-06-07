@@ -13,22 +13,21 @@ public class Reader implements Runnable
 {
     private static Logger logger = LogManager.getLogger("default_logger");
     private RandomAccessFile file;
-    private long fileLength;
     private int pieceLength;
     private int piecesCount;
     private int lastPieceLength;
     private byte piece[];
     private byte lastPiece[];
     private boolean stop;
+    private Thread thread;
 
     private BlockingQueue<Trio<Integer, byte[], SocketChannel>> readyQueue = new LinkedBlockingQueue<>();
     private BlockingQueue<Pair<Integer, SocketChannel>> mustReadQueue = new LinkedBlockingQueue<>();
 
 
-    public void initiate(String filename, String path, long fileLength,
+    public void initiate(String path, long fileLength,
                          int pieceLength, int piecesCount) throws FileNotFoundException
     {
-        this.fileLength = fileLength;
         this.pieceLength = pieceLength;
         this.piecesCount = piecesCount;
         piece = new byte[pieceLength];
@@ -56,15 +55,16 @@ public class Reader implements Runnable
     public void start()
     {
         stop = false;
-        Thread thread = new Thread(this, "Reader");
+        thread = new Thread(this, "Reader");
         thread.start();
     }
 
     public void stop()
     {
-        stop = true;
         try
         {
+            stop = true;
+            thread.interrupt();
             file.close();
         }
         catch (IOException e)
@@ -85,7 +85,7 @@ public class Reader implements Runnable
             }
             catch (InterruptedException e)
             {
-                logger.info("It never happens");
+                return;
             }
             read(data);
         }
