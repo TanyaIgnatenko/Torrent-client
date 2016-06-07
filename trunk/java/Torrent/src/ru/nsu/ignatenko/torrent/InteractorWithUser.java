@@ -15,7 +15,7 @@ class InteractorWithUser implements Runnable
 
     private TorrentClient torrentClient;
     private BlockingQueue<Peer> peers;
-    boolean stop ;
+    boolean stop;
 
     InteractorWithUser(TorrentClient torrentClient, BlockingQueue<Peer> peers)
     {
@@ -29,7 +29,7 @@ class InteractorWithUser implements Runnable
                 "To create torrent from file use: -c [path to Torrent] [path to file]\n" +
                 "To distribute file from torrent use: -s [path to Torrent] [path to File]\n" +
                 "To download file from torrent use: -l [path to Torrent] [path to download file]");
-//
+
         Scanner scanner = new Scanner(System.in);
         String input = scanner.next();
         PeerBehaviour ourPeerBehaviour = new PeerBehaviour();
@@ -55,37 +55,6 @@ class InteractorWithUser implements Runnable
             System.out.println("Some problem happened. For more information look in a log file. Torrent client is terminated.");
             System.exit(1);
         }
-//        PeerBehaviour ourPeerBehaviour = new PeerBehaviour();
-//        Scanner scanner = new Scanner(System.in);
-//        int input = scanner.nextInt();
-//        if (input == 1)
-//        {
-//            ourPeerBehaviour.setSeeder(true);
-//            ourPeerBehaviour.setLeecher(false);
-//            ourPeerBehaviour.setPathToTorrent("C:/pass/java/trunk/Torrent2/host1/movie.torrent");
-//            ourPeerBehaviour.setPathToFile("C:/pass/java/trunk/Torrent2/host1/movie.MOV");
-//        }
-//        else if (input == 2)
-//        {
-//            ourPeerBehaviour.setSeeder(true);
-//            ourPeerBehaviour.setLeecher(false);
-//            ourPeerBehaviour.setPathToTorrent("C:/pass/java/trunk/Torrent2/host2/movie.torrent");
-//            ourPeerBehaviour.setPathToFile("C:/pass/java/trunk/Torrent2/host2/movie.MOV");
-//        }
-//        else if (input == 3)
-//        {
-//            ourPeerBehaviour.setLeecher(true);
-//            ourPeerBehaviour.setSeeder(false);
-//            ourPeerBehaviour.setPathToTorrent("C:/pass/java/trunk/Torrent2/downloader1/movie.torrent");
-//            ourPeerBehaviour.setPathToFile("C:/pass/java/trunk/Torrent2/downloader1/movie.MOV");
-//        }
-//        else if (input == 4)
-//        {
-//            ourPeerBehaviour.setLeecher(true);
-//            ourPeerBehaviour.setSeeder(false);
-//            ourPeerBehaviour.setPathToTorrent("C:/pass/java/trunk/Torrent2/downloader2/movie.torrent");
-//            ourPeerBehaviour.setPathToFile("C:/pass/java/trunk/Torrent2/downloader2/movie.MOV");
-//        }
         return ourPeerBehaviour;
     }
 
@@ -96,12 +65,13 @@ class InteractorWithUser implements Runnable
                 "To tell about peer that has this torrent use: [peerID] [ip] [port]\n" +
                 "To stop work of torrent client use: stop");
 
-        while (true)
+        while (!stop)
         {
             Scanner scanner = new Scanner(System.in);
             String input = scanner.next();
             if (input.equals("stop"))
             {
+                stop = true;
                 torrentClient.stop();
             }
             else
@@ -126,120 +96,6 @@ class InteractorWithUser implements Runnable
             }
         }
     }
-//        System.out.println("Print 1 or 2");
-//        Scanner scanner = new Scanner(System.in);
-//        int input = scanner.nextInt();
-//        int i = 0;
-//        while (!stop)
-//        {
-//            try
-//            {
-//                Peer peer = generatePeer(i, input);
-//                if (peer != null)
-//                {
-//                    peers.put(peer);
-//                }
-//            }
-//            catch (InterruptedException e)
-//            {
-//                logger.info("Never happens");
-//            }
-//            ++i;
-//        }
-//    }
-
-//        try
-//        {
-//            Peer peer = new Peer();
-//            peer.setPeerID("12345678901234566881".getBytes(Charset.forName("ASCII")));
-//            peer.setIp(InetAddress.getByName("127.0.0.1"));
-//            peer.setPort(6881);
-//            peers.put(peer);
-//        }
-//        catch (UnknownHostException e)
-//        {
-//            e.printStackTrace();
-//        }
-//        catch (InterruptedException e)
-//        {
-//            e.printStackTrace();
-//        }
-//        try
-//        {
-//            if(torrentClient.getOurPeer().getPort() != 6882)
-//            {
-//                Peer peer = new Peer();
-//                peer.setPeerID("12345678901234566882".getBytes(Charset.forName("ASCII")));
-//                peer.setIp(InetAddress.getByName("127.0.0.1"));
-//                peer.setPort(6882);
-//                peers.put(peer);
-//            }
-//        }
-//        catch (UnknownHostException e)
-//        {
-//            e.printStackTrace();
-//        }
-//        catch (InterruptedException e)
-//        {
-//            e.printStackTrace();
-//        }
-
-//    public Peer generatePeer(int i, int input)
-//    {
-//
-//        Peer peer = new Peer();
-//        if (i == 1)
-//        {
-//            try
-//            {
-//                peer.setPeerID("12345678901234566881".getBytes(Charset.forName("ASCII")));
-//                peer.setIp(InetAddress.getByName("127.0.0.1"));
-//                peer.setPort(6881);
-//                System.out.println("hello1");
-//
-//                return peer;
-//            }
-//            catch (UnknownHostException e)
-//            {
-//                e.printStackTrace();
-//            }
-//        }
-//        if (i == 2)
-//        {
-//            try
-//            {
-//                peer.setPeerID("12345678901234566882".getBytes(Charset.forName("ASCII")));
-//                peer.setIp(InetAddress.getByName("127.0.0.1"));
-//                peer.setPort(6882);
-//                System.out.println("hello2");
-//                return peer;
-//            }
-//            catch (UnknownHostException e)
-//            {
-//                e.printStackTrace();
-//            }
-//        }
-//        if (i == 3 && input == 2)
-//        {
-//            try
-//            {
-//                peer.setPeerID("12345678901234566883".getBytes(Charset.forName("ASCII")));
-//                peer.setIp(InetAddress.getByName("127.0.0.1"));
-//                peer.setPort(6883);
-//                System.out.println("hello3");
-//            }
-//            catch (UnknownHostException e)
-//            {
-//                e.printStackTrace();
-//            }
-//            return peer;
-//        }
-//        if(i == 4)
-//        {
-//            stop = true;
-//        }
-//        return null;
-//    }
 
     public void printStatistics(BlockingQueue<Peer> connectedPeers)
     {

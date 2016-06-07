@@ -76,7 +76,7 @@ public class Reader implements Runnable
     @Override
     public void run()
     {
-        while (true)
+        while (!stop)
         {
             Pair<Integer, SocketChannel> data = null;
             try

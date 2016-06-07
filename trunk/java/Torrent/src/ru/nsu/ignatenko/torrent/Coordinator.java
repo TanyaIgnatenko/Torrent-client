@@ -72,7 +72,7 @@ public class Coordinator implements Runnable
                     logger.info("It never happens");
                 }
         }
-        while (true)
+        while (!stop)
         {
             Peer newPeer = newConnectedPeers.poll();
             if(newPeer != null)
@@ -145,5 +145,10 @@ public class Coordinator implements Runnable
                 }
             }
         }
+    }
+
+    public void stop()
+    {
+        stop = true;
     }
 }
