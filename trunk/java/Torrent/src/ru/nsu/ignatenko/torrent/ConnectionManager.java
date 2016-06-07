@@ -47,7 +47,7 @@ public class ConnectionManager
 				serverSocket = ServerSocketChannel.open();
 				serverSocket.bind(new InetSocketAddress(port));
 				ourPeer.setPort(port);
-				String peerID = "1234567890123456" + port;
+				String peerID = "1234567890123456" + ourPeer.getPeerID() + port;
 				ourPeer.setPeerID(peerID.getBytes(Charset.forName("ASCII")));
 				System.out.println("Ready to listen port " + port);
 				System.out.println("Set peerID: " + peerID);
