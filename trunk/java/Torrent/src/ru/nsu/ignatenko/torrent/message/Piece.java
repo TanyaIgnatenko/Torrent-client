@@ -22,10 +22,17 @@ public class Piece  extends Message
 
     public void parse(SocketChannel channel) throws IOException
     {
+        int count = 0;
         ByteBuffer idx = ByteBuffer.allocate(4);
         ByteBuffer pieceTmp = ByteBuffer.allocate(length - 4);
-        int count = channel.read(idx);
-        count += channel.read(pieceTmp);
+        while (idx.hasRemaining())
+        {
+            count+= channel.read(idx);
+        }
+        while (pieceTmp.hasRemaining())
+        {
+            count += channel.read(pieceTmp);
+        }
         idx.rewind();
         pieceIdx = idx.getInt();
         pieceTmp.rewind();
