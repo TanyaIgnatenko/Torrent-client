@@ -25,7 +25,7 @@ class InteractorWithUser implements Runnable
 
     public PeerBehaviour getInfoAboutOurPeer()
     {
-        System.out.println("Input format:\n" +
+        System.out.println("\nInput format:\n" +
                 "To create torrent from file use: -c [path to Torrent] [path to file]\n" +
                 "To distribute file from torrent use: -s [path to Torrent] [path to File]\n" +
                 "To download file from torrent use: -l [path to Torrent] [path to download file]");
@@ -103,6 +103,22 @@ class InteractorWithUser implements Runnable
         for (Peer peer : connectedPeers)
         {
             System.out.println("Peer with Id: " + new String(peer.getPeerID()) + " sent " + peer.getNumDoneRequests() + " pieces.");
+        }
+    }
+
+    public void waitStopCommand()
+    {
+        System.out.println("\nInput format:\n" + "To stop work of torrent client use: stop");
+
+        while (!stop)
+        {
+            Scanner scanner = new Scanner(System.in);
+            String input = scanner.next();
+            if (input.equals("stop"))
+            {
+                stop = true;
+                torrentClient.stop();
+            }
         }
     }
 }

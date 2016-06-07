@@ -11,26 +11,21 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Writer implements Runnable
 {
     private static Logger logger = LogManager.getLogger("default_logger");
-    RandomAccessFile file;
-    long fileLength;
-    int pieceLength;
-    int piecesCount;
-    byte piece[][];
+    private RandomAccessFile file;
+    private int pieceLength;
     private boolean stop;
+    private Thread thread;
 
-    BlockingQueue<Pair<Integer, byte[]>> piecesQueue = new LinkedBlockingQueue<>();
-    BlockingQueue<Integer> changesQueue = new LinkedBlockingQueue<>();
+    private BlockingQueue<Pair<Integer, byte[]>> piecesQueue = new LinkedBlockingQueue<>();
+    private BlockingQueue<Integer> changesQueue = new LinkedBlockingQueue<>();
 
     public Writer()
     {
     }
 
-    public void initiate(String filename, String path, long fileLength, int pieceLength, int piecesCount) throws IOException
+    public void initiate(String path, int pieceLength) throws IOException
     {
-        this.fileLength = fileLength;
         this.pieceLength = pieceLength;
-        this.piecesCount = piecesCount;
-        piece = new byte[piecesCount][pieceLength];
         try
         {
             File tmp = new File(path);
@@ -46,7 +41,7 @@ public class Writer implements Runnable
 
     public void start()
     {
-        Thread thread = new Thread(this, "Writer");
+        thread = new Thread(this, "Writer");
         thread.start();
     }
 
@@ -62,7 +57,7 @@ public class Writer implements Runnable
             }
             catch (InterruptedException e)
             {
-                logger.info("It never happens");
+                return;
             }
             write(pieceInfo.first, pieceInfo.second);
         }
@@ -94,6 +89,7 @@ public class Writer implements Runnable
         try
         {
             stop = true;
+            thread.interrupt();
             if(file != null)
             {
                 file.close();

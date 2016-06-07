@@ -23,6 +23,7 @@ public class Coordinator implements Runnable
     private TorrentClient torrentClient;
 
 
+    private Thread thread;
     private BlockingQueue<Peer> connectedPeers;
     private BlockingQueue<Peer> newConnectedPeers;
     private TorrentInfo torrentInfo;
@@ -50,7 +51,7 @@ public class Coordinator implements Runnable
 
     public void start()
     {
-        Thread thread = new Thread(this, "Coordinator");
+        thread = new Thread(this, "Coordinator");
         thread.start();
     }
 
@@ -67,10 +68,7 @@ public class Coordinator implements Runnable
                         newConnectedPeers.wait();
                     }
                 }
-                catch (InterruptedException e)
-                {
-                    logger.info("It never happens");
-                }
+                catch (InterruptedException e) {}
         }
         while (!stop)
         {
@@ -150,5 +148,6 @@ public class Coordinator implements Runnable
     public void stop()
     {
         stop = true;
+        thread.interrupt();
     }
 }
