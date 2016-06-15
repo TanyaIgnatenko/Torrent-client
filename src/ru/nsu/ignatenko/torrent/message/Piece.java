@@ -9,6 +9,7 @@ import java.nio.channels.SocketChannel;
 
 public class Piece  extends Message
 {
+    private final static int PIECE_IDX_SIZE = 4;
     private int length;
     private int pieceIdx;
     private byte[] piece;
@@ -16,15 +17,15 @@ public class Piece  extends Message
     public Piece(int length, Peer peer)
     {
         this.length = length;
-        piece = new byte[length-4];
+        piece = new byte[length - PIECE_IDX_SIZE];
         this.peer = peer;
     }
 
     public void parse(SocketChannel channel) throws IOException
     {
         int count = 0;
-        ByteBuffer idx = ByteBuffer.allocate(4);
-        ByteBuffer pieceTmp = ByteBuffer.allocate(length - 4);
+        ByteBuffer idx = ByteBuffer.allocate(PIECE_IDX_SIZE);
+        ByteBuffer pieceTmp = ByteBuffer.allocate(length - PIECE_IDX_SIZE);
         while (idx.hasRemaining())
         {
             count+= channel.read(idx);

@@ -17,7 +17,11 @@ import java.util.HashMap;
 
 public class MessageManager
 {
+    private Handshake handshake = new Handshake();
+    private HashMap<Byte, Reaction> messageReactions;
+    private MessageFactory messageFactory = new MessageFactory();
     private static Logger logger = LogManager.getLogger("default_logger");
+
     private final static int LENGTH_SIZE = 4;
     private final static int ID_SIZE = 1;
     private final static int PIECE_IDX_SIZE = 4;
@@ -27,10 +31,6 @@ public class MessageManager
     private final static int NUM_BITS_IN_BYTE = 8;
     private final static int NUM_RESERVED_BYTES = 8;
     private final static int HANDSHAKE_SIZE = 68;
-    private Handshake handshake = new Handshake();
-    private MessageFactory messageFactory = new MessageFactory();
-    private HashMap<Byte, Reaction> messageReactions;
-
 
     public MessageManager(HashMap<Byte, Reaction> messageReactions)
     {
@@ -73,7 +73,6 @@ public class MessageManager
         {
             throw new IOException("Unexpected EOF.");
         }
-
         lengthBuf.rewind();
         protocolNameLength = lengthBuf.get();
 
@@ -127,6 +126,7 @@ public class MessageManager
         {
             return isValidHandshake(clientHandshake);
         }
+        logger.info("Expected peerID: {} actual clien't peerID: {}", expectedPeerID, clientHandshake.getPeerID());
         return false;
     }
 
@@ -134,26 +134,14 @@ public class MessageManager
     {
         try
         {
-            int bytesWrote = -1;
-            logger.info("In sendMessage size of message : " + message.remaining());
             while (message.hasRemaining())
             {
-                bytesWrote = channel.write(message);
+                channel.write(message);
             }
-            byte id = message.get(4);
-            logger.info("Sended message {} into socket in size {} bytes.", id, bytesWrote);
         }
         catch (IOException e)
         {
-            logger.info("Error: Can't send message. Channel will be closed.");
-            try
-            {
-                channel.close();
-            }
-            catch (IOException e1)
-            {
-               logger.info("Error: Can't close channel.");
-            }
+            logger.info("Error: Can't send message.");
         }
     }
 
@@ -165,7 +153,6 @@ public class MessageManager
         message.putInt(length);
         message.put(id);
         message.putInt(pieceIdx);
-        logger.info("Generated cancel message");
         message.flip();
         return message;
     }
@@ -177,7 +164,6 @@ public class MessageManager
         byte id = 1;
         message.putInt(length);
         message.put(id);
-        logger.info("Generated unchoke message");
         message.flip();
         return message;
     }
@@ -189,7 +175,6 @@ public class MessageManager
         byte id = 0;
         message.putInt(length);
         message.put(id);
-        logger.info("Generated choke message");
         message.flip();
         return message;
     }
@@ -201,7 +186,6 @@ public class MessageManager
         byte id = 2;
         message.putInt(length);
         message.put(id);
-        logger.info("Generated interested message");
         message.flip();
         return message;
     }
@@ -213,7 +197,6 @@ public class MessageManager
         byte id = 3;
         message.putInt(length);
         message.put(id);
-        logger.info("Generated uninterested message");
         message.flip();
         return message;
     }
@@ -226,7 +209,6 @@ public class MessageManager
         message.putInt(length);
         message.put(id);
         message.putInt(pieceIdx);
-        logger.info("Generated have message");
         message.flip();
         return message;
     }
@@ -239,14 +221,12 @@ public class MessageManager
         message.putInt(length);
         message.put(id);
         message.putInt(pieceIdx);
-        logger.info("Generated request message");
         message.flip();
         return message;
     }
 
     public ByteBuffer generatePiece(byte[] piece, int pieceIdx)
     {
-        logger.info("In generatePiece length of piece: " + piece.length);
         int length = piece.length + ID_SIZE + PIECE_IDX_SIZE;
         ByteBuffer message = ByteBuffer.allocate(LENGTH_SIZE + length);
         byte id = 7;
@@ -254,47 +234,53 @@ public class MessageManager
         message.put(id);
         message.putInt(pieceIdx);
         message.put(piece);
-        logger.info("Generated piece message");
         message.flip();
         return message;
     }
 
     public ByteBuffer generateBitfield(BitSet bitfield, int pieceCount)
     {
-        int n = pieceCount/NUM_BITS_IN_BYTE + Integer.signum(pieceCount%NUM_BITS_IN_BYTE);
-        byte[] bitset = bitfield.toByteArray();
-        byte[] payload = new byte[n];
-        System.arraycopy(bitset, 0, payload, 0, bitset.length);
-        for(int i = bitfield.length(); i < n; ++i)
-        {
-            payload[i] = (byte)0;
-        }
-        int length = payload.length + ID_SIZE;
-        ByteBuffer message = ByteBuffer.allocate(length + LENGTH_SIZE);
-        byte id = 5;
-        message.putInt(length);
-        message.put(id);
-        message.put(payload);
-        logger.info("Generated bitfield message");
-        message.flip();
-        return message;
+    int n = pieceCount/NUM_BITS_IN_BYTE + Integer.signum(pieceCount%NUM_BITS_IN_BYTE);
+    byte[] bitset = bitfield.toByteArray();
+    byte[] payload = new byte[n];
+    System.arraycopy(bitset, 0, payload, 0, bitset.length);
+    for(int i = bitfield.length(); i < n; ++i)
+    {
+        payload[i] = (byte)0;
     }
+    int length = payload.length + ID_SIZE;
+    ByteBuffer message = ByteBuffer.allocate(length + LENGTH_SIZE);
+    byte id = 5;
+    message.putInt(length);
+    message.put(id);
+    message.put(payload);
+    message.flip();
+    return message;
+}
+
 
     public void receiveMessage(SocketChannel socket, Peer peer) throws IOException
     {
+        int count = 0;
         ByteBuffer data1 = ByteBuffer.allocate(LENGTH_SIZE);
-
-        int count = socket.read(data1);
+        while(data1.hasRemaining())
+        {
+            count+= socket.read(data1);
+        }
         if (count == -1 || count != LENGTH_SIZE)
         {
             throw new EOFException();
         }
 
-        logger.info("Received some message");
         data1.rewind();
         int length = data1.getInt();
+
+        count = 0;
         ByteBuffer data2 = ByteBuffer.allocate(ID_SIZE);
-        count = socket.read(data2);
+        while(data2.hasRemaining())
+        {
+            count+= socket.read(data2);
+        }
         if (count == -1 || count != 1)
         {
             throw new EOFException();
@@ -302,7 +288,6 @@ public class MessageManager
 
         data2.rewind();
         byte id = data2.get();
-        logger.info("With id " + id);
         Message message = messageFactory.create(id, length-1, peer);
         message.parse(socket);
         messageReactions.get(id).react(message);

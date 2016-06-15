@@ -33,7 +33,7 @@ public class Reader implements Runnable
         piece = new byte[pieceLength];
         if (fileLength % pieceLength != 0)
         {
-            lastPieceLength = (int) fileLength % pieceLength;
+            lastPieceLength = (int)(fileLength % pieceLength);
         }
         else
         {
@@ -102,34 +102,25 @@ public class Reader implements Runnable
             if (idx != piecesCount - 1)
             {
                 file.read(piece);
-//                logger.info("Piece is read : "+ new String(piece)+" "+piece.toString());
                 try
                 {
                     readyQueue.put(new Trio<>(idx, Arrays.copyOf(piece, piece.length), socket));
                 }
-                catch (InterruptedException e)
-                {
-                    logger.info("It never happens");
-                }
+                catch (InterruptedException e){}
             }
             else
             {
                 file.read(lastPiece);
-//                logger.info("LastPiece is read : "+new String(lastPiece));
                 try
                 {
                     readyQueue.put(new Trio<>(idx, Arrays.copyOf(lastPiece, lastPiece.length), socket));
                 }
-                catch (InterruptedException e)
-                {
-                    logger.info("It never happens");
-                }
-//                logger.info("Read a last piece");
+                catch (InterruptedException e) {}
             }
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            logger.info("Error: Can't read a piece with idx {}." + idx);
         }
     }
 

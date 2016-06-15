@@ -16,8 +16,8 @@ public class Writer implements Runnable
     private boolean stop;
     private Thread thread;
 
-    private BlockingQueue<Pair<Integer, byte[]>> piecesQueue = new LinkedBlockingQueue<>();
-    private BlockingQueue<Integer> changesQueue = new LinkedBlockingQueue<>();
+    private BlockingQueue<Pair<Integer, byte[]>> mustWriteQueue = new LinkedBlockingQueue<>();
+    private BlockingQueue<Integer> readyWriteQueue = new LinkedBlockingQueue<>();
 
     public Writer()
     {
@@ -48,19 +48,16 @@ public class Writer implements Runnable
     @Override
     public void run()
     {
-        while (!stop)
+        try
         {
-            Pair<Integer, byte[]> pieceInfo = null;
-            try
+            while (!stop)
             {
-                pieceInfo = piecesQueue.take();
+                Pair<Integer, byte[]> pieceInfo = null;
+                pieceInfo = mustWriteQueue.take();
+                write(pieceInfo.first, pieceInfo.second);
             }
-            catch (InterruptedException e)
-            {
-                return;
-            }
-            write(pieceInfo.first, pieceInfo.second);
         }
+        catch(InterruptedException e) {}
     }
 
     public void write(int idx, byte[] piece)
@@ -71,16 +68,13 @@ public class Writer implements Runnable
             file.write(piece);
             try
             {
-                changesQueue.put(idx);
+                readyWriteQueue.put(idx);
             }
-            catch(InterruptedException e)
-            {
-                logger.info("It never happens");
-            }
+            catch(InterruptedException e){}
         }
         catch (IOException e)
         {
-            logger.info("Error: Can't write a piece with id {} to file." + idx);
+            logger.info("Error: Can't write a piece with idx {} to file." + idx);
         }
     }
 
@@ -103,11 +97,11 @@ public class Writer implements Runnable
 
     public BlockingQueue<Pair<Integer, byte[]>> getMustWriteQueue()
     {
-        return piecesQueue;
+        return mustWriteQueue;
     }
 
     public BlockingQueue<Integer> getReadyWriteQueue()
     {
-        return changesQueue;
+        return readyWriteQueue;
     }
 }

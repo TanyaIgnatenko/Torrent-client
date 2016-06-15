@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import ru.nsu.ignatenko.torrent.exceptions.PortNotFoundException;
 import ru.nsu.ignatenko.torrent.exceptions.SelectorException;
 import ru.nsu.ignatenko.torrent.message.reaction.*;
@@ -53,7 +51,7 @@ public class TorrentClient
         messageReactions.put((byte)4, new HaveReaction());
         messageReactions.put((byte)5, new BitfieldReaction());
         messageReactions.put((byte)6, new RequestReaction(reader.getMustReadQueue()));
-        messageReactions.put((byte)7, new PieceReaction(writer.getMustWriteQueue(), torrentInfo));
+        messageReactions.put((byte)7, new PieceReaction(writer.getMustWriteQueue(), torrentInfo, ourPeer));
         messageReactions.put((byte)8, new CancelReaction(reader.getMustReadQueue()));
         messageManager = new MessageManager(messageReactions);
     }
@@ -101,7 +99,7 @@ public class TorrentClient
 
                 ourPeer.setBitfield(bitfield);
                 start(torrentInfo, pathToFile);
-                userInteractor.waitStopCommand();
+//                userInteractor.waitStopCommand();
             }
             else if(ourPeerBehaviour.isLeecher())
             {
@@ -109,15 +107,17 @@ public class TorrentClient
                 String pathToFile = ourPeerBehaviour.getPathToFile() ;
                 BitSet bitfield = new BitSet(torrentInfo.getPiecesCount());
                 ourPeer.setBitfield(bitfield);
+                ourPeer.setCountPieces(torrentInfo.getPiecesCount());
                 start(torrentInfo, pathToFile);
 
                 Thread thread = new Thread(userInteractor);
                 thread.start();
 
-                while(!stop)
+                try
                 {
-                    try
+                    while(!stop)
                     {
+
                         Peer peerToConnect = peers.take();
                         connectionManager.connectTo(peerToConnect);
 
@@ -129,11 +129,8 @@ public class TorrentClient
                             }
                         }
                     }
-                    catch (InterruptedException e)
-                    {
-                       return;
-                    }
                 }
+                catch (InterruptedException e) {}
             }
         }
     }
@@ -162,7 +159,7 @@ public class TorrentClient
                                       messageManager,
                                       writer.getReadyWriteQueue(),
                                       reader.getReadyReadQueue(),
-                                      ourPeer, writer, torrentInfo, this, userInteractor);
+                                      ourPeer, writer, torrentInfo, userInteractor);
 
         connectionManager = new ConnectionManager(messageManager,
                                                   connectedPeers,

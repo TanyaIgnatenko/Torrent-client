@@ -10,6 +10,7 @@ import java.net.StandardSocketOptions;
 import java.nio.channels.*;
 import java.nio.charset.Charset;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.io.IOException;
@@ -47,9 +48,13 @@ public class ConnectionManager
 				serverSocket = ServerSocketChannel.open();
 				serverSocket.bind(new InetSocketAddress(port));
 				ourPeer.setPort(port);
-				String peerID = "1234567890123456" + ourPeer.getPeerID() + port;
-				ourPeer.setPeerID(peerID.getBytes(Charset.forName("ASCII")));
-				System.out.println("Ready to listen port " + port);
+
+//                Random random = new Random();
+//                String peerID = "12345678901" + (200000000 + random.nextInt() % 100000000);
+
+                String peerID = "1234567890123456" + port;
+                ourPeer.setPeerID(peerID.getBytes(Charset.forName("ASCII")));
+                System.out.println("Ready to listen port " + port);
 				System.out.println("Set peerID: " + peerID);
 				logger.info("Ready to listen port " + port);
 			}
@@ -97,6 +102,7 @@ public class ConnectionManager
 			else
 			{
 				logger.info("Got valid handshake");
+				System.out.println("Got valid handshake");
 				peer.setChannel(client);
 				try
 				{
@@ -105,6 +111,7 @@ public class ConnectionManager
 					selectorRegisterLock.lock();
 					try
 					{
+						selector.wakeup();
 						client.register(selector, SelectionKey.OP_READ, peer);
 					}
 					finally
@@ -140,7 +147,6 @@ public class ConnectionManager
 				ServerSocketChannel acceptor = (ServerSocketChannel) connectionKey.channel();
 				client = acceptor.accept();
 				logger.info("Some peer want to connect to me");
-//				logger.info("Receiving handshake...");
 				messageManager.createHandshake(ourPeer.getPeerID(), torrentInfo.getHandshakeHash());
 				Handshake clientHandshake = messageManager.receiveHandshake(client);
 				if (!messageManager.isValidHandshake(clientHandshake))
@@ -151,8 +157,7 @@ public class ConnectionManager
 				logger.info("Got valid handshake. Port:{}", ourPeer.getPort());
 				int bytesWrote = messageManager.sendHandshake(client);
 				logger.info("Handshake sent " + bytesWrote + " bytes.");
-//				logger.info("Got valid handshake and sent my handshake to peer");
-				System.out.println("Got valid handshake and sent my handshake to peer");
+				System.out.println("Got valid handshake");
 
 				Peer peer = new Peer();
 				peer.setChannel(client);
@@ -165,6 +170,7 @@ public class ConnectionManager
 					selectorRegisterLock.lock();
 					try
 					{
+						selector.wakeup();
 						client.register(selector, SelectionKey.OP_READ, peer);
 					}
 					finally
@@ -226,8 +232,7 @@ public class ConnectionManager
 					try
 					{
 						int numSelected = 0;
-
-						numSelected = selector.select(30);
+						numSelected = selector.select();
 
 						if (numSelected == 0)
 						{
@@ -267,8 +272,6 @@ public class ConnectionManager
 							}
 							if(!key.isValid())
 							{
-								System.out.println("key is not valid");
-								logger.info("Key is not valid.");
 								key.channel().close();
 								key.cancel();
 							}
@@ -289,7 +292,7 @@ public class ConnectionManager
 	public void stop()
 	{
 		stop = true;
-        thread.interrupt(); // actually unnecessary
+        thread.interrupt();
 		for(Peer peer: connectedPeers)
 		{
 			try

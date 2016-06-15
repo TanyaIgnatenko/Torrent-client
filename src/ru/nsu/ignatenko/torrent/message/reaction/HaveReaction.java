@@ -16,7 +16,6 @@ public class HaveReaction  extends Reaction
     {
         Have message_ = (Have) message;
         int pieceIdx = message_.getPieceIdx();
-        BitSet bitfield = message.getPeer().getBitfield();
-        bitfield.set(pieceIdx);
+        message.getPeer().setHavePiece(pieceIdx);
     }
 }

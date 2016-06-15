@@ -6,7 +6,9 @@ import java.util.BitSet;
 
 public class Peer
 {
+    private int countPieces;
     private BitSet bitfield;
+    private BitSet askedPieces;
     private SocketChannel channel;
     private byte[] peerID;
     private InetAddress ip;
@@ -42,6 +44,12 @@ public class Peer
     public synchronized void setBitfield(BitSet bitfield)
     {
         this.bitfield = bitfield;
+    }
+
+    public void setCountPieces(int countPieces)
+    {
+        this.countPieces = countPieces;
+        askedPieces = new BitSet(countPieces);
     }
 
     public synchronized void setHasOurBitfield()
@@ -109,9 +117,16 @@ public class Peer
         return bitfield;
     }
 
-    public synchronized void increaseNumDoneRequests(){++numDoneRequests; ++numDoneRequestsForTime;}
+    public synchronized void increaseNumDoneRequests()
+    {
+        ++numDoneRequests;
+        ++numDoneRequestsForTime;
+    }
 
-    public synchronized void decreaseNumDoneRequests(){--numDoneRequestsForTime;}
+    public synchronized void decreaseNumDoneRequestsForTime()
+    {
+        --numDoneRequestsForTime;
+    }
 
     public int getNumDoneRequestsForTime()
     {
@@ -133,5 +148,35 @@ public class Peer
         return isSeeder;
     }
 
+    public synchronized boolean isAskedPiece(int pieceIdx)
+    {
+        return askedPieces.get(pieceIdx);
+    }
 
+    public synchronized void setAskedPiece(int pieceIdx)
+    {
+        askedPieces.set(pieceIdx);
+    }
+
+    public synchronized void clearAskedPiece(int pieceIdx)
+    {
+        askedPieces.clear(pieceIdx);
+    }
+
+    public synchronized boolean havePiece(int pieceIdx)
+    {
+        if(bitfield != null)
+        {
+            return bitfield.get(pieceIdx);
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public synchronized void setHavePiece(int pieceIdx)
+    {
+        bitfield.set(pieceIdx);
+    }
 }
