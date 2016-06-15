@@ -13,20 +13,20 @@ public class TorrentInfo
     byte[] piecesHash;
     byte[] handshakeHash;
 
-    public byte[] getPieceHash(int pieceIdx)
+    public synchronized  byte[] getPieceHash(int pieceIdx)
     {
         byte[] pieceHash = new byte[HASH_LENGTH];
         System.arraycopy(piecesHash, pieceIdx * HASH_LENGTH, pieceHash, 0, HASH_LENGTH);
         return pieceHash;
     }
 
-    public String getFilename() {return filename;}
+    public synchronized  long getFileLength() {return  fileLength;}
 
-    public long getFileLength() {return  fileLength;}
+    public synchronized  int getPieceLength() {return  pieceLength;}
 
-    public int getPieceLength() {return  pieceLength;}
+    public synchronized  String getFilename() {return filename;}
 
-    public int getPiecesCount()
+    public synchronized  int getPiecesCount()
     {
         int piecesCount;
         if(fileLength%pieceLength == 0)
@@ -40,30 +40,30 @@ public class TorrentInfo
         return  piecesCount;
     }
 
-    public byte[] getHandshakeHash(){return handshakeHash;}
+    public synchronized  byte[] getHandshakeHash(){return handshakeHash;}
 
-    public void setPiecesHash(byte[] piecesHash)
+    public synchronized  void setPiecesHash(byte[] piecesHash)
     {
 
         this.piecesHash = Arrays.copyOf(piecesHash, piecesHash.length);
     }
 
-    public void setHandshakeHash(byte[] handshakeHash)
+    public synchronized  void setHandshakeHash(byte[] handshakeHash)
     {
         this.handshakeHash = Arrays.copyOf(handshakeHash, handshakeHash.length);
     }
 
-    public void setFileLength(long fileLength)
+    public synchronized  void setFileLength(long fileLength)
     {
         this.fileLength = fileLength;
     }
 
-    public void setFilename(String filename)
+    public synchronized  void setFilename(String filename)
     {
         this.filename = filename;
     }
 
-    public void setPieceLength(int pieceLength)
+    public synchronized  void setPieceLength(int pieceLength)
     {
         this.pieceLength = pieceLength;
     }

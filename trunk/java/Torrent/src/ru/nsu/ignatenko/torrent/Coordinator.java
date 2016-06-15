@@ -5,37 +5,30 @@ import org.apache.logging.log4j.Logger;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.BitSet;
 import java.util.concurrent.BlockingQueue;
 
 public class Coordinator implements Runnable
 {
     private static Logger logger = LogManager.getLogger("default_logger");
     private final static int MAX_NUM_REQUESTS = 4;
-    private Writer writer;
-    private Reader reader;
     private BlockingQueue<Trio<Integer, byte[], SocketChannel>> readyReadQueue;
     private BlockingQueue<Integer> readyWriteQueue;
-
-    private ConnectionManager connectionManager;
-    private MessageManager messageManager;
-    private InteractorWithUser interactorWithUser;
-    private TorrentClient torrentClient;
-
-
-    private Thread thread;
-    private BlockingQueue<Peer> connectedPeers;
     private BlockingQueue<Peer> newConnectedPeers;
+    private BlockingQueue<Peer> connectedPeers;
     private TorrentInfo torrentInfo;
+    private Thread thread;
     private Peer ourPeer;
     boolean has_all = false;
     boolean stop = false;
 
+    private Writer writer;
+    private InteractorWithUser interactorWithUser;
+    private MessageManager messageManager;
+
     public Coordinator(BlockingQueue<Peer> connectedPeers, BlockingQueue<Peer> newConnectedPeers, MessageManager messageManager,
                        BlockingQueue<Integer>readyWriteQueue,
                        BlockingQueue<Trio<Integer, byte[], SocketChannel>> readyReadQueue,
-                       Peer ourPeer, Writer writer, TorrentInfo torrentInfo, TorrentClient torrentClient,
-                       InteractorWithUser interactorWithUser)
+                       Peer ourPeer, Writer writer, TorrentInfo torrentInfo, InteractorWithUser interactorWithUser)
     {
         this.readyReadQueue = readyReadQueue;
         this.readyWriteQueue = readyWriteQueue;
@@ -43,7 +36,6 @@ public class Coordinator implements Runnable
         this.connectedPeers = connectedPeers;
         this.newConnectedPeers = newConnectedPeers;
         this.interactorWithUser = interactorWithUser;
-        this.torrentClient = torrentClient;
         this.torrentInfo = torrentInfo;
         this.ourPeer = ourPeer;
         this.writer = writer;
@@ -58,7 +50,6 @@ public class Coordinator implements Runnable
     @Override
     public void run()
     {
-        boolean numAskedPieces[] = new boolean[torrentInfo.getPiecesCount()];
         synchronized (newConnectedPeers)
         {
                 try
@@ -83,13 +74,13 @@ public class Coordinator implements Runnable
                 messageManager.sendMessage(newPeer.getChannel(), msg);
             }
 
+
             if (ourPeer.isLeecher())
             {
                 Integer pieceIdx = readyWriteQueue.poll();
                 if (pieceIdx != null)
                 {
-                    BitSet bitfield = ourPeer.getBitfield();
-                    bitfield.set(pieceIdx);
+                    ourPeer.setHavePiece(pieceIdx);
                     ByteBuffer message = messageManager.generateHave(pieceIdx);
                     for (Peer peer : connectedPeers)
                     {
@@ -110,26 +101,24 @@ public class Coordinator implements Runnable
             {
                 has_all = true;
 
-                BitSet bitfieldOfPeer;
-                BitSet bitfield = ourPeer.getBitfield();
                 for (int i = 0; i < torrentInfo.getPiecesCount(); ++i)
                 {
-                    if (!bitfield.get(i))
+                    if (!ourPeer.havePiece(i))
                     {
                         has_all = false;
-                        if(!numAskedPieces[i])
+
+                        if(!ourPeer.isAskedPiece(i))
                         {
                             for (Peer peer : connectedPeers)
                             {
                                 if(!peer.isChokedMe() && peer.getNumDoneRequestsForTime() <= MAX_NUM_REQUESTS)
                                 {
-                                    bitfieldOfPeer = peer.getBitfield();
-                                    if (bitfieldOfPeer != null && bitfieldOfPeer.get(i))
+                                    if (peer.havePiece(i))
                                     {
                                         ByteBuffer message = messageManager.generateRequest(i);
                                         messageManager.sendMessage(peer.getChannel(), message);
                                         peer.increaseNumDoneRequests();
-                                        numAskedPieces[i] = true;
+                                        ourPeer.setAskedPiece(i);
                                         break;
                                     }
                                 }
@@ -139,7 +128,7 @@ public class Coordinator implements Runnable
                 }
                 if (has_all)
                 {
-                    logger.info("has all pieces!");
+                    logger.info("have all pieces!");
                     stop = true;
                     writer.stop();
                     interactorWithUser.printStatistics(connectedPeers);
